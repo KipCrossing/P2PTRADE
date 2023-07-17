@@ -9,13 +9,14 @@ import {
 } from 'svelte-web3'
 import { defaultEvmStores } from 'svelte-web3'
 import { contractObject } from '../utils/contract';
-
+// @ts-ignore
+import { contracts } from 'svelte-web3'
 
 const JsonStrign = JSON.stringify(contractObject.abi)
 const contractAddress = '0x8276EF08D33D4D805f1d19F00851023660c0ae13'
 
 // @ts-ignore
-defaultEvmStores.attachContract('myContract',contractAddress, contractObject.abi)
+defaultEvmStores.attachContract('StakedEscrow',contractAddress, contractObject.abi)
 
 onMount(() => {
 	// add a test to return in SSR context
@@ -68,6 +69,29 @@ async function getBal() {
 	<h2>
 		Balance <strong>{balance}</strong>
 	</h2>
+
+
+	{#if $contracts.StakedEscrow}
+
+	{#await $contracts.StakedEscrow.methods.name().call()}
+
+	<span>waiting...</span>
+	
+	{:then value}
+	
+	<span>Name: { value } </span>
+	
+	{/await}
+
+	{:else}
+
+	<p>Connecting to contract...</p>
+
+
+	{/if}
+
+
+
 
 </section>
 
