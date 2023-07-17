@@ -7,7 +7,6 @@ import {
   chainId,
   chainData
 } from 'svelte-web3'
-
 import { defaultEvmStores } from 'svelte-web3'
 
 onMount(() => {
@@ -15,11 +14,22 @@ onMount(() => {
   defaultEvmStores.setProvider()
 })
 
+
+let balance = 0;
+
+async function getBal() {
+	if (selectedAccount){
+		const wei = await $web3.eth.getBalance($selectedAccount)
+		balance = $web3.utils.fromWei(wei, 'ether')
+	}
+}
+
+
 </script>
 
 <svelte:head>
 	<title>Home</title>
-	<meta name="description" content="Svelte demo app" />
+	<meta name="description" content="Trading App" />
 </svelte:head>
 
 <section>
@@ -27,8 +37,25 @@ onMount(() => {
 		Traiding app
 	</h1>
 
+	{#if !$connected}
+
+	<p>My application is not yet connected</p>
+
+	{:else}
+
+	<p>Connected to chain with id {$chainId}</p>
+	<p>Account {$selectedAccount}</p>
+
+	{/if}
+
 	<h2>
 		Example <strong>strong text</strong>
+	</h2>
+	<button on:click={getBal}>
+		Get balance
+	</button>
+	<h2>
+		Balance <strong>{balance}</strong>
 	</h2>
 
 </section>
