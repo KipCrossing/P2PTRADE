@@ -32,6 +32,9 @@ async function getBal() {
 		const wei = await $web3.eth.getBalance($selectedAccount)
 		balance = $web3.utils.fromWei(wei, 'ether')
 	}
+	if ($contracts.StakedEscrow){
+		console.log($contracts.StakedEscrow)
+	}
 }
 
 
