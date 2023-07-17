@@ -2,6 +2,10 @@
 
 A Svelte UI for trading using the [StakedEscrow](https://github.com/KipCrossing/staked_escrow) smart contract
 
+## Deps
+
+This app is heavenly based on [svelte-web3](https://github.com/clbrge/svelte-web3) and its API
+
 ## Developing
 
 Once you've created a project and installed dependencies with `npm install`. Start a development server:
