@@ -1,5 +1,5 @@
 <script>
-  import { onMount } from 'svelte';
+import { onMount } from 'svelte';
 import {
   connected,
   web3,
@@ -8,10 +8,19 @@ import {
   chainData
 } from 'svelte-web3'
 import { defaultEvmStores } from 'svelte-web3'
+import { contractObject } from '../utils/contract';
+
+
+const JsonStrign = JSON.stringify(contractObject.abi)
+const contractAddress = '0x8276EF08D33D4D805f1d19F00851023660c0ae13'
+
+// @ts-ignore
+defaultEvmStores.attachContract('myContract',contractAddress, contractObject.abi)
 
 onMount(() => {
-  // add a test to return in SSR context
-  defaultEvmStores.setProvider()
+	// add a test to return in SSR context
+	defaultEvmStores.setProvider()
+	
 })
 
 
@@ -23,6 +32,8 @@ async function getBal() {
 		balance = $web3.utils.fromWei(wei, 'ether')
 	}
 }
+
+
 
 
 </script>
