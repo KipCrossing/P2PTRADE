@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 
 	import { contractObject } from './contract';
-	import { Contract, ethers } from 'ethers';
+	import { Contract, ethers, parseEther } from 'ethers';
 
 	import type { StakedEscrow } from './types/StakedEscrow';
 
@@ -10,8 +10,7 @@
 
 
 	const provider = new ethers.BrowserProvider(window.ethereum)
-	const stakedEscrowContract = new Contract(contractAddress, contractObject.abi, provider) as any as StakedEscrow
-
+	// const stakedEscrowContract = new Contract(contractAddress, contractObject.abi, provider) as any as StakedEscrow
 
 	let account: string | null = null
 	let balance = "none";
@@ -41,9 +40,16 @@
 	
 
 	async function getBal() {
-		stakedEscrowContract.name().then((name: string) => {
-			console.log(name);
-		});
+		const amount = ethers.parseEther("0.04");
+		const signer = await provider.getSigner();
+		console.log(signer.address)
+		signer.sendTransaction({to: signer.address, value: amount})
+		
+		const stakedEscrowContract = new ethers.Contract(contractAddress, contractObject.abi, signer) as any as StakedEscrow;
+		const res = await stakedEscrowContract.createEscrow(amount, "shitchain4lyf", {
+			value: ethers.parseEther("0.01"),
+		})
+		console.log(res)
 		const balHex = await window.ethereum.request({method: 'eth_getBalance', params: [account, 'latest']})
 			.catch((err) => {
 			if (err.code === 4001) {
