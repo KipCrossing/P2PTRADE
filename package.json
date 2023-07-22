@@ -26,10 +26,6 @@
     "typescript": "^4.9.0"
   },
   "dependencies": {
-    "ethers": "^6.6.4",
-    "sirv-cli": "^2.0.0",
-    "svelte-web3": "^4.1.1",
-    "web3": "^4.0.3",
-    "web3modal": "^1.9.12"
+    "ethers": "^6.6.4"
   }
 }
