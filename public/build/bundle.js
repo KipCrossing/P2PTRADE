@@ -22405,12 +22405,12 @@ var app = (function () {
     }
 
     /*! MIT License. Copyright 2015-2022 Richard Moore <me@ricmoo.com>. See LICENSE.txt. */
-    var __classPrivateFieldGet$2 = (undefined && undefined.__classPrivateFieldGet) || function (receiver, state, kind, f) {
+    var __classPrivateFieldGet$2 = (window && window.__classPrivateFieldGet) || function (receiver, state, kind, f) {
         if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
         if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
         return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
     };
-    var __classPrivateFieldSet$2 = (undefined && undefined.__classPrivateFieldSet) || function (receiver, state, value, kind, f) {
+    var __classPrivateFieldSet$2 = (window && window.__classPrivateFieldSet) || function (receiver, state, value, kind, f) {
         if (kind === "m") throw new TypeError("Private method is not writable");
         if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
         if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
@@ -22615,13 +22615,13 @@ var app = (function () {
     }
 
     // Cipher Block Chaining
-    var __classPrivateFieldSet$1 = (undefined && undefined.__classPrivateFieldSet) || function (receiver, state, value, kind, f) {
+    var __classPrivateFieldSet$1 = (window && window.__classPrivateFieldSet) || function (receiver, state, value, kind, f) {
         if (kind === "m") throw new TypeError("Private method is not writable");
         if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
         if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
         return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
     };
-    var __classPrivateFieldGet$1 = (undefined && undefined.__classPrivateFieldGet) || function (receiver, state, kind, f) {
+    var __classPrivateFieldGet$1 = (window && window.__classPrivateFieldGet) || function (receiver, state, kind, f) {
         if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
         if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
         return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
@@ -22676,13 +22676,13 @@ var app = (function () {
     _CBC_iv = new WeakMap(), _CBC_lastBlock = new WeakMap();
 
     // Counter Mode
-    var __classPrivateFieldSet = (undefined && undefined.__classPrivateFieldSet) || function (receiver, state, value, kind, f) {
+    var __classPrivateFieldSet = (window && window.__classPrivateFieldSet) || function (receiver, state, value, kind, f) {
         if (kind === "m") throw new TypeError("Private method is not writable");
         if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a setter");
         if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot write private member to an object whose class did not declare it");
         return (kind === "a" ? f.call(receiver, value) : f ? f.value = value : state.set(receiver, value)), value;
     };
-    var __classPrivateFieldGet = (undefined && undefined.__classPrivateFieldGet) || function (receiver, state, kind, f) {
+    var __classPrivateFieldGet = (window && window.__classPrivateFieldGet) || function (receiver, state, kind, f) {
         if (kind === "a" && !f) throw new TypeError("Private accessor was defined without a getter");
         if (typeof state === "function" ? receiver !== state || !f : !state.has(receiver)) throw new TypeError("Cannot read private member from an object whose class did not declare it");
         return kind === "m" ? f : kind === "a" ? f.call(receiver) : f ? f.value : state.get(receiver);
@@ -24163,7 +24163,7 @@ var app = (function () {
     const { console: console_1 } = globals;
     const file = "src/App.svelte";
 
-    // (57:2) {:else}
+    // (62:2) {:else}
     function create_else_block(ctx) {
     	let p;
     	let t0;
@@ -24174,7 +24174,7 @@ var app = (function () {
     			p = element("p");
     			t0 = text("Account ");
     			t1 = text(/*account*/ ctx[0]);
-    			add_location(p, file, 58, 2, 1619);
+    			add_location(p, file, 63, 2, 1865);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, p, anchor);
@@ -24193,14 +24193,14 @@ var app = (function () {
     		block,
     		id: create_else_block.name,
     		type: "else",
-    		source: "(57:2) {:else}",
+    		source: "(62:2) {:else}",
     		ctx
     	});
 
     	return block;
     }
 
-    // (53:2) {#if !account}
+    // (58:2) {#if !account}
     function create_if_block(ctx) {
     	let p;
 
@@ -24208,7 +24208,7 @@ var app = (function () {
     		c: function create() {
     			p = element("p");
     			p.textContent = "My application is not yet connected";
-    			add_location(p, file, 54, 2, 1560);
+    			add_location(p, file, 59, 2, 1806);
     		},
     		m: function mount(target, anchor) {
     			insert_dev(target, p, anchor);
@@ -24223,7 +24223,7 @@ var app = (function () {
     		block,
     		id: create_if_block.name,
     		type: "if",
-    		source: "(53:2) {#if !account}",
+    		source: "(58:2) {#if !account}",
     		ctx
     	});
 
@@ -24283,16 +24283,16 @@ var app = (function () {
     			document.title = "Home";
     			attr_dev(meta, "name", "description");
     			attr_dev(meta, "content", "Trading App");
-    			add_location(meta, file, 44, 2, 1428);
+    			add_location(meta, file, 49, 2, 1674);
     			attr_dev(h1, "class", "svelte-1o0yx4j");
-    			add_location(h1, file, 48, 2, 1509);
-    			add_location(strong0, file, 63, 11, 1674);
-    			add_location(h20, file, 62, 2, 1658);
-    			add_location(button, file, 65, 2, 1713);
-    			add_location(strong1, file, 69, 11, 1785);
-    			add_location(h21, file, 68, 2, 1769);
+    			add_location(h1, file, 53, 2, 1755);
+    			add_location(strong0, file, 68, 11, 1920);
+    			add_location(h20, file, 67, 2, 1904);
+    			add_location(button, file, 70, 2, 1959);
+    			add_location(strong1, file, 74, 11, 2031);
+    			add_location(h21, file, 73, 2, 2015);
     			attr_dev(section, "class", "svelte-1o0yx4j");
-    			add_location(section, file, 47, 1, 1497);
+    			add_location(section, file, 52, 1, 1743);
     		},
     		l: function claim(nodes) {
     			throw new Error("options.hydrate only works if the component was compiled with the `hydratable: true` option");
@@ -24364,6 +24364,8 @@ var app = (function () {
     function instance($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('App', slots, []);
+    	const provider = new BrowserProvider(window.ethereum);
+    	const stakedEscrowContract = new Contract(contractAddress, contractObject.abi, provider);
     	let account = null;
     	let balance = "none";
 
@@ -24388,6 +24390,10 @@ var app = (function () {
     	});
 
     	async function getBal() {
+    		stakedEscrowContract.name().then(name => {
+    			console.log(name);
+    		});
+
     		const balHex = await window.ethereum.request({
     			method: 'eth_getBalance',
     			params: [account, 'latest']
@@ -24414,8 +24420,11 @@ var app = (function () {
     	$$self.$capture_state = () => ({
     		onMount,
     		contractObject,
+    		Contract,
     		ethers,
     		contractAddress,
+    		provider,
+    		stakedEscrowContract,
     		account,
     		balance,
     		getAccount,
