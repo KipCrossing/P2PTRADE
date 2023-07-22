@@ -2,9 +2,16 @@
 	import { onMount } from 'svelte';
 
 	import { contractObject } from './contract';
-	import { ethers } from 'ethers';
+	import { Contract, ethers } from 'ethers';
+
+	import type { StakedEscrow } from './types/StakedEscrow';
 
 	const contractAddress = '0x8276EF08D33D4D805f1d19F00851023660c0ae13'
+
+
+	const provider = new ethers.BrowserProvider(window.ethereum)
+	const stakedEscrowContract = new Contract(contractAddress, contractObject.abi, provider) as any as StakedEscrow
+
 
 	let account: string | null = null
 	let balance = "none";
@@ -34,6 +41,9 @@
 	
 
 	async function getBal() {
+		stakedEscrowContract.name().then((name: string) => {
+			console.log(name);
+		});
 		const balHex = await window.ethereum.request({method: 'eth_getBalance', params: [account, 'latest']})
 			.catch((err) => {
 			if (err.code === 4001) {
