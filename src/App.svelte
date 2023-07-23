@@ -7,13 +7,13 @@
 	import type { StakedEscrow } from './types/StakedEscrow';
 
 	const contractAddress = '0x8276EF08D33D4D805f1d19F00851023660c0ae13'
-
+	const NO_ONE = "0x0000000000000000000000000000000000000000"
 
 	const provider = new ethers.BrowserProvider(window.ethereum)
 	// const stakedEscrowContract = new Contract(contractAddress, contractObject.abi, provider) as any as StakedEscrow
 
 	let account: string | null = null
-	let balance = "none";
+	let balance: string | null = null;
 	
 
 	// @ts-ignore
@@ -37,19 +37,71 @@
 	onMount(() => {
 		getAccount()
 	})
+
+
+	let detailsErrorMsg: null | string = null;
+
+	let escrowNum: null | number = null;
+	async function getContractDetails() {
+		detailsErrorMsg = null;
+		if (!escrowNum) {
+			console.log("Please enter escrow number")
+			detailsErrorMsg = "Please enter escrow number"
+			return
+		}
+		const signer = await provider.getSigner();
+		const stakedEscrowContract = new ethers.Contract(contractAddress, contractObject.abi, signer) as any as StakedEscrow;
+		const res = await stakedEscrowContract.escrows(escrowNum)
+		if (res.merchant === NO_ONE) {
+			console.log("Escrow does not exist")
+			detailsErrorMsg = "Escrow does not exist"
+			return
+		}
+		
+		const amountEth = ethers.formatEther(res.amount)
+		console.log("buyer", res.buyer)
+		console.log("merchant", res.merchant)
+		console.log("amount", amountEth)
+		console.log("isDead", res.isDead)
+		console.log("details", res.details)
+
+		
+
+	}
+
+	let details: null | string  = null;
+	let escrowAmount: null | number = null;
+	let createErrorMsg: null | string = null;
+	let newEscrowNumber: null | number = null;
+
+	async function createEscrow() {
+		createErrorMsg = null;
+		if (!details || !escrowAmount) {
+			console.log("Please enter details and amount")
+			createErrorMsg = "Please enter details and amount"
+			return
+		}
+		const amount = ethers.parseEther(escrowAmount.toString());
+		const signer = await provider.getSigner();
+		// console.log(signer.address)
+		// signer.sendTransaction({to: signer.address, value: amount})
+		
+		const stakedEscrowContract = new ethers.Contract(contractAddress, contractObject.abi, signer) as any as StakedEscrow;
+		const tx = await stakedEscrowContract.createEscrow(amount, details, {
+			value: ethers.parseEther((escrowAmount/4).toString()),
+		})
+
+		const receipt = await tx.wait();
+		// const escrowCreatedEvent = receipt.events?.find(e => e.event === "EscrowCreated");
+		// const escrowId = receipt.events?.find((e: any) => e.event === 'EscrowCreated')?.args?._escrowId;
+  
+	}
+
+	
 	
 
 	async function getBal() {
-		const amount = ethers.parseEther("0.04");
-		const signer = await provider.getSigner();
-		console.log(signer.address)
-		signer.sendTransaction({to: signer.address, value: amount})
-		
-		const stakedEscrowContract = new ethers.Contract(contractAddress, contractObject.abi, signer) as any as StakedEscrow;
-		const res = await stakedEscrowContract.createEscrow(amount, "shitchain4lyf", {
-			value: ethers.parseEther("0.01"),
-		})
-		console.log(res)
+
 		const balHex = await window.ethereum.request({method: 'eth_getBalance', params: [account, 'latest']})
 			.catch((err) => {
 			if (err.code === 4001) {
@@ -93,12 +145,36 @@
 		<h2>
 			Example <strong>strong text</strong>
 		</h2>
+
 		<button on:click={getBal}>
 			Get balance
 		</button>
+		{#if balance}
 		<h2>
 			Balance <strong>{balance}</strong>
 		</h2>
+		{/if}
+		<br>
+		<br>
+		<br>
+		<input bind:value={details} placeholder="Escrow details" />
+		<input type="Amount" bind:value={escrowAmount} placeholder="Escrow amount" />
+		<button on:click={createEscrow}>
+			Create Escrow
+		</button>
+		{#if createErrorMsg}
+		<p>{createErrorMsg}</p>
+		{/if}
+		<br>
+		<input type="Escrow Number" bind:value={escrowNum} placeholder="Escrow amount" />
+		<button on:click={getContractDetails}>
+			Get Contract Details
+		</button>
+		{#if detailsErrorMsg}
+		<p>{detailsErrorMsg}</p>
+		{/if}
+
+
 	
 	
 		<!-- {#if $contracts.StakedEscrow}
