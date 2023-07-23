@@ -40,8 +40,16 @@
 
 
 	let detailsErrorMsg: null | string = null;
-
 	let escrowNum: null | number = null;
+
+	let fetchedEscrow: null | {
+		buyer: string;
+		merchant: string;
+		amount: bigint;
+		details: string;
+		isDead: boolean;
+	} = null;
+
 	async function getContractDetails() {
 		detailsErrorMsg = null;
 		if (!escrowNum) {
@@ -57,16 +65,7 @@
 			detailsErrorMsg = "Escrow does not exist"
 			return
 		}
-		
-		const amountEth = ethers.formatEther(res.amount)
-		console.log("buyer", res.buyer)
-		console.log("merchant", res.merchant)
-		console.log("amount", amountEth)
-		console.log("isDead", res.isDead)
-		console.log("details", res.details)
-
-		
-
+		fetchedEscrow = res;
 	}
 
 	let details: null | string  = null;
@@ -90,8 +89,22 @@
 		const tx = await stakedEscrowContract.createEscrow(amount, details, {
 			value: ethers.parseEther((escrowAmount/4).toString()),
 		})
+		// TODO: add status messages for the transaction
 
 		const receipt = await tx.wait();
+		console.log("receipt", receipt);
+
+		const EscrowCreatedEvent = stakedEscrowContract.filters['EscrowCreated(uint256,address,uint256)']
+		const events = await stakedEscrowContract.queryFilter(EscrowCreatedEvent, receipt.blockNumber)
+		console.log("events", events);
+		// TODO: add some checks to make sure the event is the one we want
+
+		const escrowID: bigint = events[0].args?._escrowId;
+
+		console.log("escrowID", escrowID);
+		newEscrowNumber = Number(escrowID);
+
+
 		// const escrowCreatedEvent = receipt.events?.find(e => e.event === "EscrowCreated");
 		// const escrowId = receipt.events?.find((e: any) => e.event === 'EscrowCreated')?.args?._escrowId;
   
@@ -173,31 +186,11 @@
 		{#if detailsErrorMsg}
 		<p>{detailsErrorMsg}</p>
 		{/if}
+		{#if newEscrowNumber}
+		<p>Escrow created with number {newEscrowNumber}</p>
+		{/if}
 
 
-	
-	
-		<!-- {#if $contracts.StakedEscrow}
-	
-		{#await $contracts.StakedEscrow.methods.name().call()}
-	
-		<span>waiting...</span>
-		
-		{:then value}
-		
-		<span>Name: { value } </span>
-		
-		{/await}
-	
-		{:else}
-	
-		<p>Connecting to contract...</p>
-	
-	
-		{/if} -->
-	
-	
-	
 	
 	</section>
 	
