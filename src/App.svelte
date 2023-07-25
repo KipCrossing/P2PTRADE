@@ -10,9 +10,9 @@
   import type { StakedEscrow } from "./types/StakedEscrow";
 
   import AccountInfo from "./components/AccountInfo.svelte";
+  import CreateEscrowComp from "./components/ViewEscrowComp.svelte";
 
-  const contractAddress = "0x8276EF08D33D4D805f1d19F00851023660c0ae13";
-  const NO_ONE = "0x0000000000000000000000000000000000000000";
+  import { NO_ONE, contractAddress } from "./utils/consts";
 
   const urlParams = new URLSearchParams(window.location.search);
   const escrowID: string | null = urlParams.get("escrowID") || null;
@@ -146,31 +146,7 @@
         <Alert title="Error!" color="red">{detailsErrorMsg}</Alert>
       {/if}
     {:else}
-      <h2>Create Escrow</h2>
-      <br />
-      <input bind:value={details} placeholder="Escrow details" />
-
-      <input
-        type="Amount"
-        bind:value={escrowAmount}
-        placeholder="Escrow amount"
-      />
-
-      {#if createProgressMsg !== null}
-        <Button loading>Create Escrow</Button>
-        <Alert title="Status" color="blue">{createProgressMsg}</Alert>
-      {:else}
-        <Button on:click={createEscrow}>Create Escrow</Button>
-      {/if}
-      {#if createErrorMsg}
-        <Alert title="Error!" color="red">{createErrorMsg}</Alert>
-      {/if}
-      {#if newEscrowNumber}
-        <Button
-          href={`${window.location.href}?escrowID=${newEscrowNumber}`}
-          target="_blank">View Escrow {newEscrowNumber}</Button
-        >
-      {/if}
+      <CreateEscrowComp />
     {/if}
   </Container>
 </SvelteUIProvider>
