@@ -1,12 +1,15 @@
 <script lang="ts">
-  import { SvelteUIProvider } from "@svelteuidev/core";
+  import { Affix, Container, SvelteUIProvider } from "@svelteuidev/core";
   import { Button } from "@svelteuidev/core";
+  import { Alert } from "@svelteuidev/core";
   import { onMount } from "svelte";
 
   import { contractObject } from "./contract";
   import { Contract, ethers, parseEther } from "ethers";
 
   import type { StakedEscrow } from "./types/StakedEscrow";
+
+  import AccountInfo from "./components/AccountInfo.svelte";
 
   const contractAddress = "0x8276EF08D33D4D805f1d19F00851023660c0ae13";
   const NO_ONE = "0x0000000000000000000000000000000000000000";
@@ -17,29 +20,7 @@
   const provider = new ethers.BrowserProvider(window.ethereum);
   // const stakedEscrowContract = new Contract(contractAddress, contractObject.abi, provider) as any as StakedEscrow
 
-  let account: string | null = null;
-  let balance: string | null = null;
-
-  // @ts-ignore
-  // defaultEvmStores.attachContract('StakedEscrow',contractAddress, contractObject.abi)
-
-  async function getAccount() {
-    const accounts = await window.ethereum
-      .request({ method: "eth_requestAccounts" })
-      .catch((err) => {
-        if (err.code === 4001) {
-          // EIP-1193 userRejectedRequest error
-          // If this happens, the user rejected the connection request.
-          console.log("Please connect to MetaMask.");
-        } else {
-          console.error(err);
-        }
-      });
-    account = accounts[0];
-  }
-
   onMount(() => {
-    getAccount();
     if (escrowID) {
       getContractDetails();
     }
@@ -137,22 +118,6 @@
     newEscrowNumber = Number(escrowID);
     createProgressMsg = null;
   }
-
-  async function getBal() {
-    const balHex = await window.ethereum
-      .request({ method: "eth_getBalance", params: [account, "latest"] })
-      .catch((err) => {
-        if (err.code === 4001) {
-          // EIP-1193 userRejectedRequest error
-          // If this happens, the user rejected the connection request.
-          console.log("Please connect to MetaMask.");
-        } else {
-          console.error(err);
-        }
-      });
-    const balWei = parseInt(balHex, 16);
-    balance = (balWei / 10 ** 18).toString();
-  }
 </script>
 
 <svelte:head>
@@ -160,65 +125,52 @@
   <meta name="description" content="Trading App" />
 </svelte:head>
 
-<SvelteUIProvider themeObserver="dark">
-  <h1>Trading app</h1>
+<SvelteUIProvider>
+  <Container size="xs" override={{ px: "xs" }}>
+    <h1>Trading app</h1>
+    <Affix position={{ top: 20, right: 20 }}>
+      <AccountInfo />
+    </Affix>
 
-  {#if !account}
-    <p>My application is not yet connected</p>
-  {:else}
-    <p>Account {account}</p>
-  {/if}
+    {#if escrowID}
+      <h2>Buyer Portal</h2>
+      {#if fetchedEscrow}
+        <p>merchant: {fetchedEscrow.merchant}</p>
+        <p>buyer: {fetchedEscrow.buyer}</p>
+        <p>amount: {fetchedEscrow.amount}</p>
+        <p>details: {fetchedEscrow.details}</p>
+        <p>isDead: {fetchedEscrow.isDead}</p>
+      {/if}
 
-  {#if escrowID}
-    <h2>Buyer Portal</h2>
-    <button on:click={getContractDetails}> Get Contract Details </button>
-    {#if fetchedEscrow}
-      <p>merchant: {fetchedEscrow.merchant}</p>
-      <p>buyer: {fetchedEscrow.buyer}</p>
-      <p>amount: {fetchedEscrow.amount}</p>
-      <p>details: {fetchedEscrow.details}</p>
-      <p>isDead: {fetchedEscrow.isDead}</p>
-    {/if}
-
-    {#if detailsErrorMsg}
-      <p>{detailsErrorMsg}</p>
-    {/if}
-  {:else}
-    <h2>Create Escrow Portal</h2>
-
-    <button on:click={getBal}> Get balance </button>
-    {#if balance}
-      <h2>
-        Balance <strong>{balance}</strong>
-      </h2>
-    {/if}
-    <br />
-    <br />
-    <br />
-    <input bind:value={details} placeholder="Escrow details" />
-    <input
-      type="Amount"
-      bind:value={escrowAmount}
-      placeholder="Escrow amount"
-    />
-
-    {#if createProgressMsg !== null}
-      <Button loading>Create Escrow</Button>
-      <p>{createProgressMsg}</p>
+      {#if detailsErrorMsg}
+        <Alert title="Error!" color="red">{detailsErrorMsg}</Alert>
+      {/if}
     {:else}
-      <Button on:click={createEscrow}>Create Escrow</Button>
+      <h2>Create Escrow</h2>
+      <br />
+      <input bind:value={details} placeholder="Escrow details" />
+
+      <input
+        type="Amount"
+        bind:value={escrowAmount}
+        placeholder="Escrow amount"
+      />
+
+      {#if createProgressMsg !== null}
+        <Button loading>Create Escrow</Button>
+        <Alert title="Status" color="blue">{createProgressMsg}</Alert>
+      {:else}
+        <Button on:click={createEscrow}>Create Escrow</Button>
+      {/if}
+      {#if createErrorMsg}
+        <Alert title="Error!" color="red">{createErrorMsg}</Alert>
+      {/if}
+      {#if newEscrowNumber}
+        <Button
+          href={`${window.location.href}?escrowID=${newEscrowNumber}`}
+          target="_blank">View Escrow {newEscrowNumber}</Button
+        >
+      {/if}
     {/if}
-    {#if createErrorMsg}
-      <p>{createErrorMsg}</p>
-    {/if}
-    {#if newEscrowNumber}
-      <p>Escrow created with number {newEscrowNumber}</p>
-      <a
-        href={`${window.location.href}?escrowID=${newEscrowNumber}`}
-        target="_blank"
-      >
-        {window.location.href}?escrowID={newEscrowNumber}
-      </a>
-    {/if}
-  {/if}
+  </Container>
 </SvelteUIProvider>
