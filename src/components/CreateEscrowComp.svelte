@@ -65,25 +65,29 @@
 </script>
 
 <Container size="xs" override={{ px: "xs" }}>
-  <h2>Create Escrow</h2>
-  <br />
-  <input bind:value={details} placeholder="Escrow details" />
-
-  <input type="Amount" bind:value={escrowAmount} placeholder="Escrow amount" />
-
-  {#if createProgressMsg !== null}
-    <Button loading>Create Escrow</Button>
-    <Alert title="Status" color="blue">{createProgressMsg}</Alert>
-  {:else}
-    <Button on:click={createEscrow}>Create Escrow</Button>
-  {/if}
-  {#if createErrorMsg}
-    <Alert title="Error!" color="red">{createErrorMsg}</Alert>
-  {/if}
   {#if newEscrowNumber}
+    <h3>Escrow created!</h3>
     <Button
       href={`${window.location.href}?escrowID=${newEscrowNumber}`}
       target="_blank">View Escrow {newEscrowNumber}</Button
     >
+  {:else}
+    <input bind:value={details} placeholder="Escrow details" />
+    <input
+      type="Amount"
+      bind:value={escrowAmount}
+      placeholder="Escrow amount"
+    />
+
+    {#if createProgressMsg !== null}
+      <Button loading>Create Escrow</Button>
+      <Alert title="Status" color="blue">{createProgressMsg}</Alert>
+    {:else}
+      <Button on:click={createEscrow}>Create Escrow</Button>
+    {/if}
+  {/if}
+
+  {#if createErrorMsg}
+    <Alert title="Error!" color="red">{createErrorMsg}</Alert>
   {/if}
 </Container>
