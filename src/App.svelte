@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { SvelteUIProvider } from "@svelteuidev/core";
+  import { Button } from "@svelteuidev/core";
   import { onMount } from "svelte";
 
   import { contractObject } from "./contract";
@@ -86,13 +88,16 @@
   let details: null | string = null;
   let escrowAmount: null | number = null;
   let createErrorMsg: null | string = null;
+  let createProgressMsg: null | string = null;
   let newEscrowNumber: null | number = null;
 
   async function createEscrow() {
     createErrorMsg = null;
+    createProgressMsg = "Creating escrow...";
     if (!details || !escrowAmount) {
       console.log("Please enter details and amount");
       createErrorMsg = "Please enter details and amount";
+      createProgressMsg = null;
       return;
     }
     const amount = ethers.parseEther(escrowAmount.toString());
@@ -108,10 +113,14 @@
     const tx = await stakedEscrowContract.createEscrow(amount, details, {
       value: ethers.parseEther((escrowAmount / 4).toString()),
     });
+    createProgressMsg =
+      "Escrow request signed and sent. Waiting for confirmation...";
     // TODO: add status messages for the transaction
 
     const receipt = await tx.wait();
     console.log("receipt", receipt);
+
+    createProgressMsg = `Escrow created in block ${receipt.blockNumber}`;
 
     const EscrowCreatedEvent =
       stakedEscrowContract.filters["EscrowCreated(uint256,address,uint256)"];
@@ -126,6 +135,7 @@
 
     console.log("escrowID", escrowID);
     newEscrowNumber = Number(escrowID);
+    createProgressMsg = null;
   }
 
   async function getBal() {
@@ -150,7 +160,7 @@
   <meta name="description" content="Trading App" />
 </svelte:head>
 
-<section>
+<SvelteUIProvider themeObserver="dark">
   <h1>Trading app</h1>
 
   {#if !account}
@@ -191,7 +201,13 @@
       bind:value={escrowAmount}
       placeholder="Escrow amount"
     />
-    <button on:click={createEscrow}> Create Escrow </button>
+
+    {#if createProgressMsg !== null}
+      <Button loading>Create Escrow</Button>
+      <p>{createProgressMsg}</p>
+    {:else}
+      <Button on:click={createEscrow}>Create Escrow</Button>
+    {/if}
     {#if createErrorMsg}
       <p>{createErrorMsg}</p>
     {/if}
@@ -205,18 +221,4 @@
       </a>
     {/if}
   {/if}
-</section>
-
-<style>
-  section {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    flex: 0.6;
-  }
-
-  h1 {
-    width: 100%;
-  }
-</style>
+</SvelteUIProvider>
