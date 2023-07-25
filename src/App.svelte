@@ -18,6 +18,7 @@
 
   function closeModal() {
     opened = false;
+    window.location.reload();
   }
 </script>
 
