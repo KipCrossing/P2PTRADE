@@ -36,5 +36,11 @@ To style this site, we are currently using [svelteui.org](https://www.svelteui.o
 
 ### TODO
 
+#### Build
+
 - Need to add a step in the build process to copy the js into the html script tag instead of manually doing it.
 - Add Web3 (IPFS) dev dep to automatically upload to IPFS on `npm run deploy`
+
+#### App
+
+- save created escrows to the client and display them in a list
