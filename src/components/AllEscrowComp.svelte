@@ -2,24 +2,19 @@
   import { Badge, Card, Button } from "@svelteuidev/core";
   import { Container } from "@svelteuidev/core";
   import type { EscrowInfo } from "../types/escrowInfo";
+  import { getEscrowList } from "../utils/storage";
+  import { onMount } from "svelte";
+  import { getAccount } from "../utils/getAccount";
 
-  const allEscrowList: EscrowInfo[] = [
-    {
-      escrowId: "1",
-      amount: 0.1,
-      details: "test",
-    },
-    {
-      escrowId: "2",
-      amount: 0.1,
-      details: "test2",
-    },
-    {
-      escrowId: "3",
-      amount: 0.1,
-      details: "test3",
-    },
-  ];
+  let allEscrowList: EscrowInfo[] = [];
+
+  onMount(() => {
+    getAccount().then((acc) => {
+      console.log(acc);
+      allEscrowList = getEscrowList(acc);
+      console.log(allEscrowList);
+    });
+  });
 </script>
 
 <Container size="xs" override={{ px: "xs" }}>
