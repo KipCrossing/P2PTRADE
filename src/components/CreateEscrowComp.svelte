@@ -5,6 +5,8 @@
   import { contractAddress } from "../utils/consts";
   import { contractObject } from "../contract";
   import type { StakedEscrow } from "../types/StakedEscrow";
+  import { updateEscrowList } from "../utils/storage";
+  import type { EscrowInfo } from "../types/escrowInfo";
 
   const provider = new ethers.BrowserProvider(window.ethereum);
 
@@ -59,9 +61,15 @@
     console.log("escrowID", escrowID);
     newEscrowNumber = Number(escrowID);
     createProgressMsg = null;
-  }
 
-  onMount(() => {});
+    // add escrow to client side lite
+    const escrowInfo: EscrowInfo = {
+      escrowId: escrowID.toString(),
+      details: details,
+      amount: escrowAmount,
+    };
+    updateEscrowList(escrowInfo, signer.address);
+  }
 </script>
 
 <Container size="xs" override={{ px: "xs" }}>
