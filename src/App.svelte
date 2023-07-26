@@ -19,7 +19,6 @@
 
   function closeModal() {
     opened = false;
-    window.location.reload();
   }
 </script>
 
@@ -29,14 +28,14 @@
 </svelte:head>
 
 <SvelteUIProvider>
+  <Affix position={{ top: 20, right: 20 }}>
+    <AccountInfo />
+  </Affix>
   <Modal {opened} on:close={closeModal} title="Create Escrow">
     <CreateEscrowComp />
   </Modal>
   <Container size="xs" override={{ px: "xs" }}>
     <h1>Trading app</h1>
-    <Affix position={{ top: 20, right: 20 }}>
-      <AccountInfo />
-    </Affix>
 
     {#if escrowID}
       <ViewEscrowComp {escrowID} />

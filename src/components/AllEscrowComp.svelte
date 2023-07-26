@@ -2,7 +2,7 @@
   import { Badge, Card, Button } from "@svelteuidev/core";
   import { Container } from "@svelteuidev/core";
   import type { EscrowInfo } from "../types/escrowInfo";
-  import { getEscrowList } from "../utils/storage";
+  import { escrowList, getEscrowList } from "../utils/storage";
   import { onMount } from "svelte";
   import { getAccount } from "../utils/getAccount";
 
@@ -10,15 +10,15 @@
 
   onMount(() => {
     getAccount().then((acc) => {
-      console.log(acc);
+      // console.log(acc);
       allEscrowList = getEscrowList(acc);
-      console.log(allEscrowList);
+      // console.log(allEscrowList);
     });
   });
 </script>
 
 <Container size="xs" override={{ px: "xs" }}>
-  {#each allEscrowList as { escrowId, amount, details }, i}
+  {#each $escrowList as { escrowId, amount, details }, i}
     <li>
       <Card shadow="sm" padding="lg">
         <h3>Escrow {escrowId}</h3>
