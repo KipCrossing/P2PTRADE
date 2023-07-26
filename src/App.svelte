@@ -11,6 +11,7 @@
   import ViewEscrowComp from "./components/ViewEscrowComp.svelte";
   import AllEscrowComp from "./components/AllEscrowComp.svelte";
 
+  export let title: string;
   const urlParams = new URLSearchParams(window.location.search);
   const escrowID: string | null = urlParams.get("escrowID") || null;
 
@@ -23,7 +24,7 @@
 </script>
 
 <svelte:head>
-  <title>Home</title>
+  <title>{title}</title>
   <meta name="description" content="Trading App" />
 </svelte:head>
 
