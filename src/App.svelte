@@ -24,6 +24,7 @@
 
 <svelte:head>
   <title>{title}</title>
+
   <meta name="description" content="Trading App" />
 </svelte:head>
 
@@ -35,8 +36,10 @@
     <CreateEscrowComp />
   </Modal>
   <Container size="xs" override={{ px: "xs" }}>
-    <h1>Trading app</h1>
-
+    <Button href={window.location.href.split("?")[0]}
+      ><h1>Trading app</h1></Button
+    >
+    <br />
     {#if escrowID}
       <ViewEscrowComp {escrowID} />
     {:else}
