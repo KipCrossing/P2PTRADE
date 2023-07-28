@@ -99,8 +99,14 @@
     if (res.buyer !== NO_ONE) {
       hasBuyer = true;
     }
-    if (hasBuyer && res.isDead) {
-      progress = 2;
+    if (hasBuyer) {
+      progress = 1;
+      buyItemData = {
+        title: "Buyer Entered",
+        description: `The buyer ${res.buyer} has entered the escrow and paid ${escrowEth} ETH`,
+        extra: `Buyer has also deposited ${escrowEth / 4}`,
+        color: "blue",
+      };
     } else if (res.isDead) {
       progress = 1;
       buyItemData = {
@@ -110,23 +116,30 @@
         color: "red",
       };
     }
+
+    if (hasBuyer && res.isDead) {
+      progress = 2;
+      completeItemData = {
+        title: "Ended",
+        description: "The escrow has ended",
+        extra: "The buyer received the goods or the merchant refunded",
+        color: "black",
+      };
+    }
   }
 
   let cancelProgressMsg: null | string = null;
 
   async function cancelEscrow() {
     cancelProgressMsg = "Canceling escrow...";
-    const amount = parseInt(fetchedEscrow.amount.toString());
     const signer = await provider.getSigner();
-    // console.log(signer.address)
-    // signer.sendTransaction({to: signer.address, value: amount})
 
     const stakedEscrowContract = new ethers.Contract(
       contractAddress,
       contractObject.abi,
       signer
     ) as any as StakedEscrow;
-    const tx = await stakedEscrowContract.cancelEscrow(parseInt(escrowID));
+    const tx = await stakedEscrowContract.cancelEscrow(Number(escrowID));
     cancelProgressMsg =
       "Cancel request signed and sent. Waiting for confirmation...";
 
@@ -136,7 +149,7 @@
     cancelProgressMsg = `Escrow cancelled in block ${receipt.blockNumber}`;
 
     const EscrowCreatedEvent =
-      stakedEscrowContract.filters["EscrowCreated(uint256,address,uint256)"];
+      stakedEscrowContract.filters["EscrowCancelled(uint256)"];
     const events = await stakedEscrowContract.queryFilter(
       EscrowCreatedEvent,
       receipt.blockNumber
@@ -148,10 +161,83 @@
     // refresh the page
     window.location.reload();
   }
+
+  let enterProgressMsg: string | null = null;
+
+  async function enterEscrow() {
+    const amount = escrowEth / 4;
+    enterProgressMsg = "Depositing... " + amount + " ETH";
+    const signer = await provider.getSigner();
+
+    const stakedEscrowContract = new ethers.Contract(
+      contractAddress,
+      contractObject.abi,
+      signer
+    ) as any as StakedEscrow;
+    const tx = await stakedEscrowContract.deposit(Number(escrowID), {
+      value: ethers.parseEther((escrowEth * 1.25).toString()),
+    });
+    enterProgressMsg =
+      "Deposit request signed and sent. Waiting for confirmation...";
+
+    const receipt = await tx.wait();
+    console.log("receipt", receipt);
+
+    enterProgressMsg = `Escrow cancelled in block ${receipt.blockNumber}`;
+
+    const EscrowCreatedEvent =
+      stakedEscrowContract.filters["Deposit(uint256,address,uint256)"];
+    const events = await stakedEscrowContract.queryFilter(
+      EscrowCreatedEvent,
+      receipt.blockNumber
+    );
+    console.log("events", events);
+    // TODO: add some checks to make sure the event is the one we want
+
+    enterProgressMsg = null;
+    // refresh the page
+    window.location.reload();
+  }
+
+  let completeProgressMsg: string | null = null;
+
+  async function completeEscrow() {
+    const amount = escrowEth / 4;
+    completeProgressMsg =
+      "Completing Trade, sending " + amount + " ETH to the merchant";
+    const signer = await provider.getSigner();
+
+    const stakedEscrowContract = new ethers.Contract(
+      contractAddress,
+      contractObject.abi,
+      signer
+    ) as any as StakedEscrow;
+    const tx = await stakedEscrowContract.completeTrade(Number(escrowID));
+    completeProgressMsg =
+      "Complete Escrow request signed and sent. Waiting for confirmation...";
+
+    const receipt = await tx.wait();
+    console.log("receipt", receipt);
+
+    completeProgressMsg = `Escrow cancelled in block ${receipt.blockNumber}`;
+
+    const EscrowCreatedEvent =
+      stakedEscrowContract.filters["TradeCompleted(uint256,address)"];
+    const events = await stakedEscrowContract.queryFilter(
+      EscrowCreatedEvent,
+      receipt.blockNumber
+    );
+    console.log("events", events);
+    // TODO: add some checks to make sure the event is the one we want
+
+    completeProgressMsg = null;
+    // refresh the page
+    window.location.reload();
+  }
 </script>
 
 <Container size="xs" override={{ px: "xs" }}>
-  <h2>Buyer Portal</h2>
+  <h2>{isMerchant ? "Merchant" : "Buyer"} Portal</h2>
   {#if fetchedEscrow}
     <Card shadow="sm" padding="lg">
       <p>
@@ -185,6 +271,30 @@
         <Button color="red" on:click={cancelEscrow}>Cancel Escrow</Button>
       {/if}
     {/if}
+
+    {#if !isMerchant && !isBuyer && !fetchedEscrow.isDead}
+      <br />
+
+      {#if enterProgressMsg !== null}
+        <Button loading color="green">Enter Escrow</Button>
+        <Alert title="Status" color="blue">{enterProgressMsg}</Alert>
+      {:else}
+        <Button color="green" on:click={enterEscrow}>Enter Escrow</Button>
+      {/if}
+    {/if}
+
+    {#if !isMerchant && isBuyer && !fetchedEscrow.isDead}
+      <br />
+      {#if completeProgressMsg !== null}
+        <Button loading color="green">Release Payment to Merchant</Button>
+        <Alert title="Status" color="blue">{completeProgressMsg}</Alert>
+      {:else}
+        <Button color="green" on:click={completeEscrow}
+          >Release Payment to Merchant</Button
+        >
+      {/if}
+    {/if}
+
     <br />
     <Center>
       <Timeline active={progress} lineWidth={4} bulletSize={20}>
@@ -207,13 +317,14 @@
           <Text size="xs">{buyItemData.extra}</Text>
         </Timeline.Item>
 
-        <Timeline.Item title="Complete">
-          <Text color="dimmed" size="sm"
-            ><Text variant="link" root="span" href="#" inherit
-              >Robert Gluesticker</Text
-            > left a code review on your pull request</Text
+        <Timeline.Item
+          title={completeItemData.title}
+          color={completeItemData.color}
+        >
+          <Text size="sm" color={completeItemData.color}
+            >{completeItemData.description}</Text
           >
-          <!-- <Text size="xs">12 minutes ago</Text> -->
+          <Text size="xs">{completeItemData.extra}</Text>
         </Timeline.Item>
       </Timeline>
     </Center>
