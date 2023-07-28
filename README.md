@@ -43,4 +43,7 @@ To style this site, we are currently using [svelteui.org](https://www.svelteui.o
 
 #### App
 
-- save created escrows to the client and display them in a list
+- save escrows that buyer has entered into
+- also save the block number and use it to search for complete or cancel
+- Share button (copy link)
+- Instruction???
