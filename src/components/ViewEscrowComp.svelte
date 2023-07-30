@@ -23,7 +23,7 @@
   const provider = new ethers.BrowserProvider(window.ethereum);
 
   onMount(() => {
-    if (escrowID) {
+    if (parseInt(escrowID) === 0 || escrowID) {
       getContractDetails();
     }
   });
@@ -35,6 +35,7 @@
     amount: bigint;
     details: string;
     isDead: boolean;
+    complete: boolean;
   } = null;
   let escrowEth: null | number = null;
   let isMerchant = false;
@@ -73,7 +74,7 @@
       detailsErrorMsg = "Please enter a valid escrow number";
       return;
     }
-    if (!escrowNum) {
+    if (!escrowNum && escrowNum !== 0) {
       console.log("Please enter escrow number");
       detailsErrorMsg = "Please enter escrow number";
       return;
@@ -119,14 +120,21 @@
         color: "red",
       };
     }
-
-    if (hasBuyer && res.isDead) {
+    if (hasBuyer && res.complete) {
       progress = 2;
       completeItemData = {
-        title: "Ended",
-        description: "The escrow has ended",
-        extra: "The buyer received the goods or the merchant refunded",
-        color: "black",
+        title: "Completed",
+        description: "The escrow has been completed",
+        extra: "The buyer has released the funds to the merchant",
+        color: "green",
+      };
+    } else if (hasBuyer && res.isDead) {
+      progress = 2;
+      completeItemData = {
+        title: "Escrow Cancelled",
+        description: "The escrow was cancelled by the merchant",
+        extra: "The buyer was refunded the full amount",
+        color: "red",
       };
     }
   }
@@ -169,7 +177,9 @@
 
   async function enterEscrow() {
     const amount = escrowEth / 4;
-    enterProgressMsg = "Depositing... " + amount + " ETH";
+    const amountInWei = Number(ethers.parseEther(amount.toString()));
+    enterProgressMsg =
+      "Depositing... " + escrowEth + " ETH + stake" + amount + "ETH";
     const signer = await provider.getSigner();
 
     const stakedEscrowContract = new ethers.Contract(
@@ -178,7 +188,7 @@
       signer
     ) as any as StakedEscrow;
     const tx = await stakedEscrowContract.deposit(Number(escrowID), {
-      value: ethers.parseEther((escrowEth * 1.25).toString()),
+      value: amountInWei * 5,
     });
     enterProgressMsg =
       "Deposit request signed and sent. Waiting for confirmation...";
@@ -243,13 +253,14 @@
   <h2>{isMerchant ? "Merchant" : "Buyer"} Portal</h2>
   {#if fetchedEscrow}
     <Card shadow="sm" padding="lg">
-      <p>
-        Status: <Badge
-          variant="filled"
-          color={fetchedEscrow.isDead ? "red" : "green"}
-          >{fetchedEscrow.isDead ? "dead" : "active"}</Badge
-        >
-      </p>
+      {#if fetchedEscrow.complete}
+        Status: <Badge variant="filled" color={"green"}>{"complete"}</Badge>
+      {:else if fetchedEscrow.isDead}
+        Status: <Badge variant="filled" color={"red"}>{"cancelled"}</Badge>
+      {:else}
+        Status: <Badge variant="filled" color={"blue"}>{"active"}</Badge>
+      {/if}
+
       <p>
         merchant: <Badge variant="filled" color={"blue"}
           >{fetchedEscrow.merchant}</Badge
