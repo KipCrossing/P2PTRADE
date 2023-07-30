@@ -38,6 +38,8 @@ To style this site, we are currently using [svelteui.org](https://www.svelteui.o
 
 #### Build
 
+- look deeper into [viem](https://viem.sh/docs/contract/getContract.html)
+- npm cli to get latest, contract address, abi and types from StakesEscrow repo `npm run update_abi`
 - Need to add a step in the build process to copy the js into the html script tag instead of manually doing it.
 - Add Web3 (IPFS) dev dep to automatically upload to IPFS on `npm run deploy`
 
