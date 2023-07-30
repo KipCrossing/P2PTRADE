@@ -3,10 +3,12 @@
   import { Container, Button, Alert } from "@svelteuidev/core";
   import { ethers } from "ethers";
   import { contractAddress } from "../utils/consts";
-  import { contractObject } from "../contract";
   import type { StakedEscrow } from "../types/StakedEscrow";
   import { updateEscrowList } from "../utils/storage";
   import type { EscrowInfo } from "../types/escrowInfo";
+  import { StakedEscrow__factory } from "../types/factories/StakedEscrow__factory";
+
+  const abi = StakedEscrow__factory.abi;
 
   const provider = new ethers.BrowserProvider(window.ethereum);
 
@@ -32,7 +34,7 @@
 
     const stakedEscrowContract = new ethers.Contract(
       contractAddress,
-      contractObject.abi,
+      abi,
       signer
     ) as any as StakedEscrow;
     const tx = await stakedEscrowContract.createEscrow(amount, details, {

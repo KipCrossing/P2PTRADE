@@ -9,11 +9,14 @@
   } from "@svelteuidev/core";
   import { ethers } from "ethers";
   import { NO_ONE, contractAddress } from "../utils/consts";
-  import { contractObject } from "../contract";
   import type { StakedEscrow } from "../types/StakedEscrow";
   import { onMount } from "svelte";
   import { Timeline, Text } from "@svelteuidev/core";
   import { getAccount } from "../utils/getAccount";
+
+  import { StakedEscrow__factory } from "../types/factories/StakedEscrow__factory";
+
+  const abi = StakedEscrow__factory.abi;
 
   export let escrowID: string;
 
@@ -78,7 +81,7 @@
     const signer = await provider.getSigner();
     const stakedEscrowContract = new ethers.Contract(
       contractAddress,
-      contractObject.abi,
+      abi,
       signer
     ) as any as StakedEscrow;
     const res = await stakedEscrowContract.escrows(escrowNum);
@@ -136,7 +139,7 @@
 
     const stakedEscrowContract = new ethers.Contract(
       contractAddress,
-      contractObject.abi,
+      abi,
       signer
     ) as any as StakedEscrow;
     const tx = await stakedEscrowContract.cancelEscrow(Number(escrowID));
@@ -171,7 +174,7 @@
 
     const stakedEscrowContract = new ethers.Contract(
       contractAddress,
-      contractObject.abi,
+      abi,
       signer
     ) as any as StakedEscrow;
     const tx = await stakedEscrowContract.deposit(Number(escrowID), {
@@ -209,7 +212,7 @@
 
     const stakedEscrowContract = new ethers.Contract(
       contractAddress,
-      contractObject.abi,
+      abi,
       signer
     ) as any as StakedEscrow;
     const tx = await stakedEscrowContract.completeTrade(Number(escrowID));
