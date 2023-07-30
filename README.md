@@ -2,7 +2,7 @@
 
 This dApp is a (very) lightweight UI written with Svelte and id designed to compile to a single html file so it can be decentralized when hosted on [IPFS](https://ipfs.tech/).
 
-The Smart Contract (SC) that this dApp connects to is the [Staked Escrow](https://github.com/KipCrossing/staked_escrow) SC. The SC has be deployed on the Sepolia testnet with address: [0x8276EF08D33D4D805f1d19F00851023660c0ae13](https://sepolia.etherscan.io/address/0x8276EF08D33D4D805f1d19F00851023660c0ae13)
+The Smart Contract (SC) that this dApp connects to is the [Staked Escrow](https://github.com/KipCrossing/staked_escrow) SC. The SC has be deployed on the Sepolia testnet with address: [0x3e013f301A2E09546ab3f1a5354bC53C51A6341E](https://sepolia.etherscan.io/address/0x3e013f301A2E09546ab3f1a5354bC53C51A6341E)
 
 ## Get started
 
