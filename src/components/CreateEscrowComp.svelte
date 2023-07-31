@@ -7,10 +7,19 @@
   import { updateEscrowList } from "../utils/storage";
   import type { EscrowInfo } from "../types/escrowInfo";
   import { StakedEscrow__factory } from "../types/factories/StakedEscrow__factory";
+  import { getContract, parseEther, parseTransaction } from "viem";
+  import { publicClient, walletClient } from "../utils/client";
 
   const abi = StakedEscrow__factory.abi;
 
   const provider = new ethers.BrowserProvider(window.ethereum);
+
+  const contract = getContract({
+    address: contractAddress,
+    abi: StakedEscrow__factory.abi,
+    publicClient,
+    walletClient,
+  });
 
   let details: null | string = null;
   let escrowAmount: null | number = null;
@@ -27,50 +36,47 @@
       createProgressMsg = null;
       return;
     }
-    const amount = ethers.parseEther(escrowAmount.toString());
-    const signer = await provider.getSigner();
-    // console.log(signer.address)
-    // signer.sendTransaction({to: signer.address, value: amount})
+    // const signer = await provider.getSigner();
+    // // console.log(signer.address)
+    // // signer.sendTransaction({to: signer.address, value: amount})
 
-    const stakedEscrowContract = new ethers.Contract(
-      contractAddress,
-      abi,
-      signer
-    ) as any as StakedEscrow;
-    const tx = await stakedEscrowContract.createEscrow(amount, details, {
-      value: ethers.parseEther((escrowAmount / 4).toString()),
+    // const stakedEscrowContract = new ethers.Contract(
+    //   contractAddress,
+    //   abi,
+    //   signer
+    // ) as any as StakedEscrow;
+
+    const amount = parseEther(escrowAmount.toString());
+
+    const address = await walletClient.requestAddresses();
+
+    //  Argument of type '[bigint]' is not assignable to parameter of type
+    //  'readonly [bigint, string]'.
+    //  Source has 1 element(s) but target requires 2.ts(2345)
+    const hash = await contract.write.createEscrow([amount, address[0]], {
+      value: parseEther((escrowAmount / 4).toString()),
     });
+
+    console.log("hash", hash);
+
+    const tx = parseTransaction(hash);
+    console.log("tx", tx);
+
     createProgressMsg =
       "Escrow request signed and sent. Waiting for confirmation...";
     // TODO: add status messages for the transaction
 
-    const receipt = await tx.wait();
-    console.log("receipt", receipt);
+    // const receipt = await tx.wait();
+    // console.log("receipt", receipt);
 
-    createProgressMsg = `Escrow created in block ${receipt.blockNumber}`;
+    // createProgressMsg = `Escrow created in block ${receipt.blockNumber}`;
 
-    const EscrowCreatedEvent =
-      stakedEscrowContract.filters["EscrowCreated(uint256,address,uint256)"];
-    const events = await stakedEscrowContract.queryFilter(
-      EscrowCreatedEvent,
-      receipt.blockNumber
-    );
-    console.log("events", events);
-    // TODO: add some checks to make sure the event is the one we want
-
-    const escrowID: bigint = events[0].args?._escrowId;
-
-    console.log("escrowID", escrowID);
-    newEscrowNumber = Number(escrowID);
-    createProgressMsg = null;
-
-    // add escrow to client side lite
-    const escrowInfo: EscrowInfo = {
-      escrowId: escrowID.toString(),
-      details: details,
-      amount: escrowAmount,
-    };
-    updateEscrowList(escrowInfo, signer.address);
+    // const EscrowCreatedEvent =
+    //   stakedEscrowContract.filters["EscrowCreated(uint256,address,uint256)"];
+    // const events = await stakedEscrowContract.queryFilter(
+    //   EscrowCreatedEvent,
+    //   receipt.blockNumber
+    // );
   }
 </script>
 
