@@ -38,6 +38,7 @@ export default {
     format: "iife",
     name: "app",
     file: "public/build/bundle.js",
+    inlineDynamicImports: true,
   },
   context: "window", // Add this
   moduleContext: "window", // Add this
