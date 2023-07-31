@@ -28,6 +28,7 @@
   },
   "dependencies": {
     "@svelteuidev/core": "^0.14.0",
-    "ethers": "^6.6.7"
+    "ethers": "^6.6.7",
+    "viem": "^1.4.2"
   }
 }
