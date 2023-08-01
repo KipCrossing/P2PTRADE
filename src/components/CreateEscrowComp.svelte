@@ -1,25 +1,7 @@
 <script lang="ts">
-  import { onMount } from "svelte";
   import { Container, Button, Alert } from "@svelteuidev/core";
-  import { ethers } from "ethers";
-  import { contractAddress } from "../utils/consts";
-  import type { StakedEscrow } from "../types/StakedEscrow";
-  import { updateEscrowList } from "../utils/storage";
-  import type { EscrowInfo } from "../types/escrowInfo";
-  import { StakedEscrow__factory } from "../types/factories/StakedEscrow__factory";
-  import { getContract, parseEther, parseTransaction } from "viem";
-  import { publicClient, walletClient } from "../utils/client";
-
-  const abi = StakedEscrow__factory.abi;
-
-  const provider = new ethers.BrowserProvider(window.ethereum);
-
-  const contract = getContract({
-    address: contractAddress,
-    abi: StakedEscrow__factory.abi,
-    publicClient,
-    walletClient,
-  });
+  import { parseEther, type Log, type TransactionReceipt } from "viem";
+  import { publicClient, useContract } from "../utils/client";
 
   let details: null | string = null;
   let escrowAmount: null | number = null;
@@ -36,47 +18,52 @@
       createProgressMsg = null;
       return;
     }
-    // const signer = await provider.getSigner();
-    // // console.log(signer.address)
-    // // signer.sendTransaction({to: signer.address, value: amount})
-
-    // const stakedEscrowContract = new ethers.Contract(
-    //   contractAddress,
-    //   abi,
-    //   signer
-    // ) as any as StakedEscrow;
 
     const amount = parseEther(escrowAmount.toString());
 
-    const address = await walletClient.requestAddresses();
-
-    //  Argument of type '[bigint]' is not assignable to parameter of type
-    //  'readonly [bigint, string]'.
-    //  Source has 1 element(s) but target requires 2.ts(2345)
-    const hash = await contract.write.createEscrow([amount, address[0]], {
-      value: parseEther((escrowAmount / 4).toString()),
+    const [account] = await window.ethereum.request({
+      method: "eth_requestAccounts",
     });
 
-    console.log("hash", hash);
+    const contract = useContract(account);
 
-    const tx = parseTransaction(hash);
-    console.log("tx", tx);
+    type EscrowCreatedDetails = {
+      _escrowId: bigint;
+      _merchant: `0x${string}`;
+      _value: bigint;
+    };
 
-    createProgressMsg =
-      "Escrow request signed and sent. Waiting for confirmation...";
-    // TODO: add status messages for the transaction
+    let merchantLogs: (Log & { args: EscrowCreatedDetails })[] | null = null;
 
-    // const receipt = await tx.wait();
-    // console.log("receipt", receipt);
+    contract.watchEvent.EscrowCreated(
+      { _merchant: account },
+      {
+        onLogs: (logs) => {
+          merchantLogs = logs;
+        },
+      }
+    );
 
-    // createProgressMsg = `Escrow created in block ${receipt.blockNumber}`;
+    const hash = await contract.write.createEscrow([amount, details], {
+      value: parseEther((escrowAmount / 4).toString()),
+    });
+    createProgressMsg = `Escrow request signed and sent. Waiting for confirmation... \n Transaction hash: ${hash}`;
 
-    // const EscrowCreatedEvent =
-    //   stakedEscrowContract.filters["EscrowCreated(uint256,address,uint256)"];
-    // const events = await stakedEscrowContract.queryFilter(
-    //   EscrowCreatedEvent,
-    //   receipt.blockNumber
-    // );
+    const transaction: TransactionReceipt =
+      await publicClient.waitForTransactionReceipt({
+        hash: hash,
+      });
+
+    createProgressMsg = `Escrow created in block ${transaction.blockNumber}`;
+
+    if (merchantLogs) {
+      merchantLogs.forEach((log) => {
+        if (log.blockNumber === transaction.blockNumber) {
+          newEscrowNumber = Number(log.args._escrowId);
+        }
+      });
+    }
+    createProgressMsg = `Escrow created with ID ${newEscrowNumber}`;
   }
 </script>
 
