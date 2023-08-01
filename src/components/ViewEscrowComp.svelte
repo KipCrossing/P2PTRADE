@@ -8,12 +8,10 @@
     Card,
   } from "@svelteuidev/core";
   import { NO_ONE, contractAddress } from "../utils/consts";
-  import type { StakedEscrow } from "../types/StakedEscrow";
   import { onMount } from "svelte";
   import { Timeline, Text } from "@svelteuidev/core";
   import { getAccount } from "../utils/getAccount";
 
-  import { StakedEscrow__factory } from "../types/factories/StakedEscrow__factory";
   import { publicClient, useContract } from "../utils/client";
   import type { Escrow } from "../types/escrow";
   import {
@@ -22,8 +20,6 @@
     type Log,
     type TransactionReceipt,
   } from "viem";
-
-  const abi = StakedEscrow__factory.abi;
 
   export let escrowID: string;
 

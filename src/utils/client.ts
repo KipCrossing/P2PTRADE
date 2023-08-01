@@ -7,7 +7,7 @@ import {
 } from "viem";
 import { mainnet, sepolia } from "viem/chains";
 import { contractAddress } from "./consts";
-import { StakedEscrow__factory } from "../types";
+import { abi } from "../types/abi";
 
 export const publicClient = createPublicClient({
   chain: sepolia,
@@ -23,7 +23,7 @@ export function useContract(account: `0x${string}`) {
 
   const contract = getContract({
     address: contractAddress,
-    abi: StakedEscrow__factory.abi,
+    abi: abi,
     publicClient,
     walletClient,
   });

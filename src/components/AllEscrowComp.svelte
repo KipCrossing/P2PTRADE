@@ -1,17 +1,10 @@
 <script lang="ts">
   import { Badge, Card, Button } from "@svelteuidev/core";
   import { Container } from "@svelteuidev/core";
-  import type { EscrowInfo } from "../types/escrowInfo";
-  import { escrowList, getEscrowList } from "../utils/storage";
   import { onMount } from "svelte";
-  import { getAccount } from "../utils/getAccount";
-  import { contractAddress } from "../utils/consts";
-  import { StakedEscrow__factory, type StakedEscrow } from "../types";
   import { writable, type Writable } from "svelte/store";
   import { useContract } from "../utils/client";
   import type { Escrow } from "../types/escrow";
-
-  const abi = StakedEscrow__factory.abi;
 
   let allEscrowList: Writable<(Escrow & { escrowId: number })[]> = writable([]);
 
