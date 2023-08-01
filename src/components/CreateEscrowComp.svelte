@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Container, Button, Alert } from "@svelteuidev/core";
   import { parseEther, type Log, type TransactionReceipt } from "viem";
-  import { publicClient, useContract } from "../utils/client";
+  import { ethereum, publicClient, useContract } from "../utils/client";
 
   let details: null | string = null;
   let escrowAmount: null | number = null;
@@ -21,7 +21,7 @@
 
     const amount = parseEther(escrowAmount.toString());
 
-    const [account] = await window.ethereum.request({
+    const [account] = await ethereum.request({
       method: "eth_requestAccounts",
     });
 

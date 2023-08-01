@@ -12,7 +12,7 @@
   import { Timeline, Text } from "@svelteuidev/core";
   import { getAccount } from "../utils/getAccount";
 
-  import { publicClient, useContract } from "../utils/client";
+  import { ethereum, publicClient, useContract } from "../utils/client";
   import type { Escrow } from "../types/escrow";
   import {
     formatEther,
@@ -74,7 +74,7 @@
       return;
     }
 
-    const [account] = await window.ethereum.request({
+    const [account] = await ethereum.request({
       method: "eth_requestAccounts",
     });
 
@@ -148,7 +148,7 @@
 
   async function cancelEscrow() {
     cancelProgressMsg = "Canceling escrow...";
-    const [account] = await window.ethereum.request({
+    const [account] = await ethereum.request({
       method: "eth_requestAccounts",
     });
 
@@ -177,7 +177,7 @@
     enterProgressMsg =
       "Depositing... " + escrowEth + " ETH + stake" + amount + "ETH";
 
-    const [account] = await window.ethereum.request({
+    const [account] = await ethereum.request({
       method: "eth_requestAccounts",
     });
 
@@ -208,7 +208,7 @@
     completeProgressMsg =
       "Completing Trade, sending " + amount + " ETH to the merchant";
 
-    const [account] = await window.ethereum.request({
+    const [account] = await ethereum.request({
       method: "eth_requestAccounts",
     });
 
