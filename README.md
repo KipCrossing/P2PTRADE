@@ -1,6 +1,6 @@
 # Trading UI
 
-This dApp is a (very) lightweight UI written with Svelte and id designed to compile to a single html file so it can be decentralized when hosted on [IPFS](https://ipfs.tech/).
+This dApp is a (very) lightweight UI written with Svelte and is designed to compile to a single html file so it can be decentralized when hosted on [IPFS](https://ipfs.tech/).
 
 The Smart Contract (SC) that this dApp connects to is the [Staked Escrow](https://github.com/KipCrossing/staked_escrow) SC. The SC has be deployed on the Sepolia testnet with address: [0x3e013f301A2E09546ab3f1a5354bC53C51A6341E](https://sepolia.etherscan.io/address/0x3e013f301A2E09546ab3f1a5354bC53C51A6341E)
 
@@ -29,6 +29,10 @@ You will need to install the [Metamask](https://metamask.io/) extension on your 
 Currently the StakedEscrow SC is deployed on the Sepolia testnet. You will need to get some test eth from a _Sepolia faucet_.
 
 ## Developing
+
+### EVM
+
+To interact with the smart contract on the EVM, [viem](https://viem.sh/docs) is used.
 
 ### Styles
 
