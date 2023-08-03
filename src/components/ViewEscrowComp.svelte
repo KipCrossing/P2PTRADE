@@ -7,20 +7,21 @@
     Badge,
     Card,
   } from "@svelteuidev/core";
-  import { ethers } from "ethers";
   import { NO_ONE, contractAddress } from "../utils/consts";
-  import type { StakedEscrow } from "../types/StakedEscrow";
   import { onMount } from "svelte";
   import { Timeline, Text } from "@svelteuidev/core";
   import { getAccount } from "../utils/getAccount";
 
-  import { StakedEscrow__factory } from "../types/factories/StakedEscrow__factory";
-
-  const abi = StakedEscrow__factory.abi;
+  import { ethereum, publicClient, useContract } from "../utils/client";
+  import type { Escrow } from "../types/escrow";
+  import {
+    formatEther,
+    parseEther,
+    type Log,
+    type TransactionReceipt,
+  } from "viem";
 
   export let escrowID: string;
-
-  const provider = new ethers.BrowserProvider(window.ethereum);
 
   onMount(() => {
     if (parseInt(escrowID) === 0 || escrowID) {
@@ -29,14 +30,7 @@
   });
 
   let detailsErrorMsg: null | string = null;
-  let fetchedEscrow: null | {
-    buyer: string;
-    merchant: string;
-    amount: bigint;
-    details: string;
-    isDead: boolean;
-    complete: boolean;
-  } = null;
+  let fetchedEscrow: null | Escrow = null;
   let escrowEth: null | number = null;
   let isMerchant = false;
   let hasBuyer = false;
@@ -79,39 +73,50 @@
       detailsErrorMsg = "Please enter escrow number";
       return;
     }
-    const signer = await provider.getSigner();
-    const stakedEscrowContract = new ethers.Contract(
-      contractAddress,
-      abi,
-      signer
-    ) as any as StakedEscrow;
-    const res = await stakedEscrowContract.escrows(escrowNum);
-    if (res.merchant === NO_ONE) {
+
+    const [account] = await ethereum.request({
+      method: "eth_requestAccounts",
+    });
+
+    const contract = useContract(account);
+
+    const res = await contract.read.escrows([BigInt(escrowNum)]);
+
+    const escrow: Escrow = {
+      buyer: res[0],
+      merchant: res[1],
+      amount: res[2],
+      details: res[3],
+      isDead: res[4],
+      complete: res[5],
+    };
+
+    if (escrow.merchant === NO_ONE) {
       console.log("Escrow does not exist");
       detailsErrorMsg = "Escrow does not exist";
       return;
     }
-    fetchedEscrow = res;
-    escrowEth = Number(ethers.formatEther(res.amount));
+    fetchedEscrow = escrow;
+    escrowEth = Number(formatEther(escrow.amount));
     const thisAccount: string = await getAccount();
-    if (thisAccount.toLowerCase() === res.merchant.toLowerCase()) {
+    if (thisAccount.toLowerCase() === escrow.merchant.toLowerCase()) {
       isMerchant = true;
     }
-    if (thisAccount.toLowerCase() === res.buyer.toLowerCase()) {
+    if (thisAccount.toLowerCase() === escrow.buyer.toLowerCase()) {
       isBuyer = true;
     }
-    if (res.buyer !== NO_ONE) {
+    if (escrow.buyer !== NO_ONE) {
       hasBuyer = true;
     }
     if (hasBuyer) {
       progress = 1;
       buyItemData = {
         title: "Buyer Entered",
-        description: `The buyer ${res.buyer} has entered the escrow and paid ${escrowEth} ETH`,
+        description: `The buyer ${escrow.buyer} has entered the escrow and paid ${escrowEth} ETH`,
         extra: `Buyer has also deposited ${escrowEth / 4}`,
         color: "blue",
       };
-    } else if (res.isDead) {
+    } else if (escrow.isDead) {
       progress = 1;
       buyItemData = {
         title: "Escrow Cancelled",
@@ -120,7 +125,7 @@
         color: "red",
       };
     }
-    if (hasBuyer && res.complete) {
+    if (hasBuyer && escrow.complete) {
       progress = 2;
       completeItemData = {
         title: "Completed",
@@ -128,7 +133,7 @@
         extra: "The buyer has released the funds to the merchant",
         color: "green",
       };
-    } else if (hasBuyer && res.isDead) {
+    } else if (hasBuyer && escrow.isDead) {
       progress = 2;
       completeItemData = {
         title: "Escrow Cancelled",
@@ -143,33 +148,24 @@
 
   async function cancelEscrow() {
     cancelProgressMsg = "Canceling escrow...";
-    const signer = await provider.getSigner();
+    const [account] = await ethereum.request({
+      method: "eth_requestAccounts",
+    });
 
-    const stakedEscrowContract = new ethers.Contract(
-      contractAddress,
-      abi,
-      signer
-    ) as any as StakedEscrow;
-    const tx = await stakedEscrowContract.cancelEscrow(Number(escrowID));
+    const contract = useContract(account);
+
+    const hash = await contract.write.cancelEscrow([BigInt(escrowID)], {});
+
     cancelProgressMsg =
-      "Cancel request signed and sent. Waiting for confirmation...";
+      "Cancel request signed and sent. Waiting for confirmation... \n Tx Hash: " +
+      hash;
 
-    const receipt = await tx.wait();
-    console.log("receipt", receipt);
+    const transaction: TransactionReceipt =
+      await publicClient.waitForTransactionReceipt({
+        hash: hash,
+      });
+    cancelProgressMsg = `Escrow cancelled in block ${transaction.blockNumber}`;
 
-    cancelProgressMsg = `Escrow cancelled in block ${receipt.blockNumber}`;
-
-    const EscrowCreatedEvent =
-      stakedEscrowContract.filters["EscrowCancelled(uint256)"];
-    const events = await stakedEscrowContract.queryFilter(
-      EscrowCreatedEvent,
-      receipt.blockNumber
-    );
-    console.log("events", events);
-    // TODO: add some checks to make sure the event is the one we want
-
-    cancelProgressMsg = null;
-    // refresh the page
     window.location.reload();
   }
 
@@ -177,35 +173,28 @@
 
   async function enterEscrow() {
     const amount = escrowEth / 4;
-    const amountInWei = Number(ethers.parseEther(amount.toString()));
+    const amountInWei = Number(parseEther(amount.toString()));
     enterProgressMsg =
       "Depositing... " + escrowEth + " ETH + stake" + amount + "ETH";
-    const signer = await provider.getSigner();
 
-    const stakedEscrowContract = new ethers.Contract(
-      contractAddress,
-      abi,
-      signer
-    ) as any as StakedEscrow;
-    const tx = await stakedEscrowContract.deposit(Number(escrowID), {
+    const [account] = await ethereum.request({
+      method: "eth_requestAccounts",
+    });
+
+    const contract = useContract(account);
+
+    const hash = await contract.write.deposit([BigInt(escrowID)], {
       value: amountInWei * 5,
     });
+
     enterProgressMsg =
       "Deposit request signed and sent. Waiting for confirmation...";
 
-    const receipt = await tx.wait();
-    console.log("receipt", receipt);
-
-    enterProgressMsg = `Escrow cancelled in block ${receipt.blockNumber}`;
-
-    const EscrowCreatedEvent =
-      stakedEscrowContract.filters["Deposit(uint256,address,uint256)"];
-    const events = await stakedEscrowContract.queryFilter(
-      EscrowCreatedEvent,
-      receipt.blockNumber
-    );
-    console.log("events", events);
-    // TODO: add some checks to make sure the event is the one we want
+    const transaction: TransactionReceipt =
+      await publicClient.waitForTransactionReceipt({
+        hash: hash,
+      });
+    cancelProgressMsg = `Escrow entered in block ${transaction.blockNumber}`;
 
     enterProgressMsg = null;
     // refresh the page
@@ -218,33 +207,25 @@
     const amount = escrowEth / 4;
     completeProgressMsg =
       "Completing Trade, sending " + amount + " ETH to the merchant";
-    const signer = await provider.getSigner();
 
-    const stakedEscrowContract = new ethers.Contract(
-      contractAddress,
-      abi,
-      signer
-    ) as any as StakedEscrow;
-    const tx = await stakedEscrowContract.completeTrade(Number(escrowID));
+    const [account] = await ethereum.request({
+      method: "eth_requestAccounts",
+    });
+
+    const contract = useContract(account);
+
+    const hash = await contract.write.completeTrade([BigInt(escrowID)], {});
+
     completeProgressMsg =
       "Complete Escrow request signed and sent. Waiting for confirmation...";
 
-    const receipt = await tx.wait();
-    console.log("receipt", receipt);
+    const transaction: TransactionReceipt =
+      await publicClient.waitForTransactionReceipt({
+        hash: hash,
+      });
 
-    completeProgressMsg = `Escrow cancelled in block ${receipt.blockNumber}`;
+    completeProgressMsg = `Escrow cancelled in block ${transaction.blockNumber}`;
 
-    const EscrowCreatedEvent =
-      stakedEscrowContract.filters["TradeCompleted(uint256,address)"];
-    const events = await stakedEscrowContract.queryFilter(
-      EscrowCreatedEvent,
-      receipt.blockNumber
-    );
-    console.log("events", events);
-    // TODO: add some checks to make sure the event is the one we want
-
-    completeProgressMsg = null;
-    // refresh the page
     window.location.reload();
   }
 </script>

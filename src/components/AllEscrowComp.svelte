@@ -1,37 +1,29 @@
 <script lang="ts">
   import { Badge, Card, Button } from "@svelteuidev/core";
   import { Container } from "@svelteuidev/core";
-  import type { EscrowInfo } from "../types/escrowInfo";
-  import { escrowList, getEscrowList } from "../utils/storage";
   import { onMount } from "svelte";
-  import { getAccount } from "../utils/getAccount";
-  import { ethers } from "ethers";
-  import { contractAddress } from "../utils/consts";
-  import { StakedEscrow__factory, type StakedEscrow } from "../types";
   import { writable, type Writable } from "svelte/store";
-
-  const provider = new ethers.BrowserProvider(window.ethereum);
-  const abi = StakedEscrow__factory.abi;
-
-  const stakedEscrowContract = new ethers.Contract(
-    contractAddress,
-    abi,
-    provider
-  ) as any as StakedEscrow;
-
-  type Escrow = {
-    buyer: string;
-    merchant: string;
-    amount: bigint;
-    details: string;
-    isDead: boolean;
-    complete: boolean;
-  };
+  import { useContract } from "../utils/client";
+  import type { Escrow } from "../types/escrow";
 
   let allEscrowList: Writable<(Escrow & { escrowId: number })[]> = writable([]);
 
   async function getEscrowInfo(escrowID: bigint) {
-    const escrow: Escrow = await stakedEscrowContract.escrows(escrowID);
+    const [account] = await window.ethereum.request({
+      method: "eth_requestAccounts",
+    });
+
+    const contract = useContract(account);
+    const res = await contract.read.escrows([BigInt(escrowID)]);
+
+    const escrow: Escrow = {
+      buyer: res[0],
+      merchant: res[1],
+      amount: res[2],
+      details: res[3],
+      isDead: res[4],
+      complete: res[5],
+    };
     return escrow;
   }
 
@@ -53,13 +45,13 @@
   });
 
   async function getMerchantEscrows() {
-    const signer = provider.getSigner();
+    const [account] = await window.ethereum.request({
+      method: "eth_requestAccounts",
+    });
 
-    const address = (await signer).address;
-    console.log(address);
+    const contract = useContract(account);
+    const escrowIDs = await contract.read.getMerchantEscrows([account]);
 
-    console.log("getting...");
-    const escrowIDs = await stakedEscrowContract.getMerchantEscrows(address);
     return escrowIDs;
   }
 </script>
@@ -70,7 +62,7 @@
       <Card shadow="sm" padding="lg">
         <h3>Escrow {escrowId}</h3>
 
-        <Badge variant="filled">{amount}</Badge>
+        <Badge variant="filled">{Number(amount) / 10 ** 18}</Badge>
         <p>
           <strong>{details}</strong>
         </p>

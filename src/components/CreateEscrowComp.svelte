@@ -1,16 +1,7 @@
 <script lang="ts">
-  import { onMount } from "svelte";
   import { Container, Button, Alert } from "@svelteuidev/core";
-  import { ethers } from "ethers";
-  import { contractAddress } from "../utils/consts";
-  import type { StakedEscrow } from "../types/StakedEscrow";
-  import { updateEscrowList } from "../utils/storage";
-  import type { EscrowInfo } from "../types/escrowInfo";
-  import { StakedEscrow__factory } from "../types/factories/StakedEscrow__factory";
-
-  const abi = StakedEscrow__factory.abi;
-
-  const provider = new ethers.BrowserProvider(window.ethereum);
+  import { parseEther, type Log, type TransactionReceipt } from "viem";
+  import { ethereum, publicClient, useContract } from "../utils/client";
 
   let details: null | string = null;
   let escrowAmount: null | number = null;
@@ -27,50 +18,52 @@
       createProgressMsg = null;
       return;
     }
-    const amount = ethers.parseEther(escrowAmount.toString());
-    const signer = await provider.getSigner();
-    // console.log(signer.address)
-    // signer.sendTransaction({to: signer.address, value: amount})
 
-    const stakedEscrowContract = new ethers.Contract(
-      contractAddress,
-      abi,
-      signer
-    ) as any as StakedEscrow;
-    const tx = await stakedEscrowContract.createEscrow(amount, details, {
-      value: ethers.parseEther((escrowAmount / 4).toString()),
+    const amount = parseEther(escrowAmount.toString());
+
+    const [account] = await ethereum.request({
+      method: "eth_requestAccounts",
     });
-    createProgressMsg =
-      "Escrow request signed and sent. Waiting for confirmation...";
-    // TODO: add status messages for the transaction
 
-    const receipt = await tx.wait();
-    console.log("receipt", receipt);
+    const contract = useContract(account);
 
-    createProgressMsg = `Escrow created in block ${receipt.blockNumber}`;
-
-    const EscrowCreatedEvent =
-      stakedEscrowContract.filters["EscrowCreated(uint256,address,uint256)"];
-    const events = await stakedEscrowContract.queryFilter(
-      EscrowCreatedEvent,
-      receipt.blockNumber
-    );
-    console.log("events", events);
-    // TODO: add some checks to make sure the event is the one we want
-
-    const escrowID: bigint = events[0].args?._escrowId;
-
-    console.log("escrowID", escrowID);
-    newEscrowNumber = Number(escrowID);
-    createProgressMsg = null;
-
-    // add escrow to client side lite
-    const escrowInfo: EscrowInfo = {
-      escrowId: escrowID.toString(),
-      details: details,
-      amount: escrowAmount,
+    type EscrowCreatedDetails = {
+      _escrowId: bigint;
+      _merchant: `0x${string}`;
+      _value: bigint;
     };
-    updateEscrowList(escrowInfo, signer.address);
+
+    let merchantLogs: (Log & { args: EscrowCreatedDetails })[] | null = null;
+
+    contract.watchEvent.EscrowCreated(
+      { _merchant: account },
+      {
+        onLogs: (logs) => {
+          merchantLogs = logs;
+        },
+      }
+    );
+
+    const hash = await contract.write.createEscrow([amount, details], {
+      value: parseEther((escrowAmount / 4).toString()),
+    });
+    createProgressMsg = `Escrow request signed and sent. Waiting for confirmation... \n Transaction hash: ${hash}`;
+
+    const transaction: TransactionReceipt =
+      await publicClient.waitForTransactionReceipt({
+        hash: hash,
+      });
+
+    createProgressMsg = `Escrow created in block ${transaction.blockNumber}`;
+
+    if (merchantLogs) {
+      merchantLogs.forEach((log) => {
+        if (log.blockNumber === transaction.blockNumber) {
+          newEscrowNumber = Number(log.args._escrowId);
+        }
+      });
+    }
+    createProgressMsg = `Escrow created with ID ${newEscrowNumber}`;
   }
 </script>
 
