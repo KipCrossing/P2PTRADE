@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Container, Button, Alert } from "@svelteuidev/core";
+  import { Container, Button, Alert, Textarea, TextInput } from "@svelteuidev/core";
   import { parseEther, type Log, type TransactionReceipt } from "viem";
   import { ethereum, publicClient, useContract } from "../utils/client";
 
@@ -75,18 +75,32 @@
       target="_blank">View Escrow {newEscrowNumber}</Button
     >
   {:else}
-    <input bind:value={details} placeholder="Escrow details" />
+  <h3>Create Escrow</h3>
+  <TextInput
+  bind:value={details}
+  placeholder="Escrow Details"
+/>
+<TextInput
+type="Amount"
+bind:value={escrowAmount}
+placeholder="Escrow amount"
+/>
+<Textarea
+placeholder="Description of Goods / Services"
+/>
+
+    <!-- <input bind:value={details} placeholder="Escrow details" />
     <input
       type="Amount"
       bind:value={escrowAmount}
       placeholder="Escrow amount"
-    />
+    /> -->
 
     {#if createProgressMsg !== null}
-      <Button loading>Create Escrow</Button>
+      <Button loading><h2>Create Escrow</h2></Button>
       <Alert title="Status" color="blue">{createProgressMsg}</Alert>
     {:else}
-      <Button on:click={createEscrow}>Create Escrow</Button>
+      <Button fullSize on:click={createEscrow}>Create Escrow</Button>
     {/if}
   {/if}
 

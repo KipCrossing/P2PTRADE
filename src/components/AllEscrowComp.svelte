@@ -58,7 +58,7 @@
 
 <Container size="xs" override={{ px: "xs" }}>
   {#each $allEscrowList as { escrowId, amount, details }, i}
-    <li>
+
       <Card shadow="sm" padding="lg">
         <h3>Escrow {escrowId}</h3>
 
@@ -66,11 +66,10 @@
         <p>
           <strong>{details}</strong>
         </p>
-        <Button href={`${window.location.href}?escrowID=${escrowId}`}
+        <Button variant="light" fullSize href={`${window.location.href}?escrowID=${escrowId}`}
           >View</Button
         >
       </Card>
-      <br />
-    </li>
+    <br />
   {/each}
 </Container>

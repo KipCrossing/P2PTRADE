@@ -1,6 +1,13 @@
 <script lang="ts">
-  import { Badge, Card } from "@svelteuidev/core";
+  import { Badge, Button, Card, SvelteUIProvider } from "@svelteuidev/core";
   import { onMount } from "svelte";
+  import { Modal, Group } from '@svelteuidev/core';
+
+  let opened = false;
+
+  function closeModal() {
+    opened = false;
+  }
 
   $: account = null;
   $: balance = null;
@@ -47,7 +54,24 @@
   });
 </script>
 
-<Card shadow="sm" padding="lg">
+<SvelteUIProvider>
+<Group position="center">
+	<Button on:click={() => (opened = true)}>My Account</Button>
+</Group>
+<Modal  {opened} on:close={closeModal} withCloseButton={false}>
+    <h3>Account Information</h3>
+    {#if !account || !balance}
+      <Badge variant="filled" color={"red"}>not connected</Badge>
+    {:else}
+      <Badge variant="filled">{account}</Badge>
+      <p>
+        Balance: <strong>{balance}</strong>
+      </p>
+    {/if}
+</Modal>
+</SvelteUIProvider>
+
+<!-- <Card shadow="sm" padding="lg">
   <h3>Account Information</h3>
   {#if !account || !balance}
     <Badge variant="filled" color={"red"}>not connected</Badge>
@@ -57,4 +81,4 @@
       Balance: <strong>{balance}</strong>
     </p>
   {/if}
-</Card>
+</Card> -->

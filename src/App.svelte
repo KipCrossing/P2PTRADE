@@ -5,12 +5,13 @@
     SvelteUIProvider,
     Button,
     Modal,
+    Flex
   } from "@svelteuidev/core";
+
   import AccountInfo from "./components/AccountInfo.svelte";
   import CreateEscrowComp from "./components/CreateEscrowComp.svelte";
   import ViewEscrowComp from "./components/ViewEscrowComp.svelte";
   import AllEscrowComp from "./components/AllEscrowComp.svelte";
-
   export let title: string;
   const urlParams = new URLSearchParams(window.location.search);
   const escrowID: string | null = urlParams.get("escrowID") || null;
@@ -29,22 +30,32 @@
 </svelte:head>
 
 <SvelteUIProvider>
+
   <Affix position={{ top: 20, right: 20 }}>
     <AccountInfo />
   </Affix>
-  <Modal {opened} on:close={closeModal} title="Create Escrow">
+
+
+  <Modal {opened} on:close={closeModal} withCloseButton={false}>
     <CreateEscrowComp />
   </Modal>
+
   <Container size="xs" override={{ px: "xs" }}>
-    <Button href={window.location.href.split("?")[0]}
-      ><h1>Trading app</h1></Button
-    >
-    <br />
+    <h1>Trading App</h1>
+    <p>Lightweight & Decentralised</p>
     {#if escrowID}
+    <Flex justify="space-between">
+      <Button href={window.location.href.split("?")[0]}>Active Escrows</Button>
+    </Flex>
+      <br />
       <ViewEscrowComp {escrowID} />
     {:else}
-      <Button color="green" on:click={() => (opened = true)}>New escrow</Button>
-      <br />
+      <!-- <Button fullSize color="green" on:click={() => (opened = true)}>New escrow</Button> -->
+      <Flex justify="space-between">
+        <Button href={window.location.href.split("?")[0]}>Active Escrows</Button>
+        <Button color="green" on:click={() => (opened = true)}>New escrow</Button>
+      </Flex>
+        <br />
       <AllEscrowComp />
     {/if}
   </Container>
