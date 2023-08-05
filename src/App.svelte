@@ -38,9 +38,12 @@
   </Modal>
 
   <Container size="xs" override={{ px: "xs" }}>
-    <div style="padding-bottom: 10px; padding-top: 20px">
+    <div style="padding-top: 20px">
       <Flex justify="space-between">
-      <Image width="70%" radius='md' src={'./logo.svg'} alt='EZSHARE' />
+        <div>
+      <Image width="7 d0%" radius='md' src={'./logo.svg'} alt='EZSHARE' />
+      <p style="margin-top: 0;">Peer to peer trustless trade.</p>
+      </div>
       <AccountInfo />
     </Flex>
   </div>
