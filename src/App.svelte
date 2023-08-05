@@ -28,7 +28,7 @@
 
 <svelte:head>
   <title>{title}</title>
-  <meta name="description" content="Trading App" />
+  <meta name="description" content="EZTRADE | Decentralised Trading App" />
 </svelte:head>
 
 <SvelteUIProvider>
