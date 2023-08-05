@@ -40,7 +40,7 @@
   <Container size="xs" override={{ px: "xs" }}>
     <div style="padding-bottom: 10px; padding-top: 20px">
       <Flex justify="space-between">
-      <Image width="70%" radius='md' src={'./eztrade.svg'} alt='EZSHARE' />
+      <Image width="70%" radius='md' src={'./logo.svg'} alt='EZSHARE' />
       <AccountInfo />
     </Flex>
   </div>
