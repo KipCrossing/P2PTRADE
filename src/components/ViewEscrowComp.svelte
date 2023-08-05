@@ -263,7 +263,7 @@
         <Button loading color="red">Cancel Escrow</Button>
         <Alert title="Status" color="blue">{cancelProgressMsg}</Alert>
       {:else}
-        <Button color="red" on:click={cancelEscrow}>Cancel Escrow</Button>
+        <Button variant="subtle" color="red" on:click={cancelEscrow}>Cancel Escrow</Button>
       {/if}
     {/if}
 

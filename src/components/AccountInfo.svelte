@@ -2,6 +2,7 @@
   import { Badge, Button, Card, SvelteUIProvider } from "@svelteuidev/core";
   import { onMount } from "svelte";
   import { Modal, Group } from '@svelteuidev/core';
+  import { Person} from 'radix-icons-svelte';
 
   let opened = false;
 
@@ -56,7 +57,8 @@
 
 <SvelteUIProvider>
 <Group position="center">
-	<Button on:click={() => (opened = true)}>My Account</Button>
+	<Button variant='default' compact on:click={() => (opened = true)} color="dark">
+    <Person slot="leftIcon" />My Wallet</Button>
 </Group>
 <Modal  {opened} on:close={closeModal} withCloseButton={false}>
     <h3>Account Information</h3>

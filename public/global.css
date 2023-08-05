@@ -8,6 +8,11 @@ body {
   background-color: #f1f1f1;
 }
 
+.svelteui-c-iMLRir {
+  padding-left: 0x;
+  padding-right: 0px;
+}
+
 input {
   width: 100%;
 }

@@ -5,6 +5,7 @@
   import { writable, type Writable } from "svelte/store";
   import { useContract } from "../utils/client";
   import type { Escrow } from "../types/escrow";
+  import { Plus } from 'radix-icons-svelte';
 
   let allEscrowList: Writable<(Escrow & { escrowId: number })[]> = writable([]);
 
@@ -56,16 +57,14 @@
   }
 </script>
 
-<Container size="xs" override={{ px: "xs" }}>
+<Container size="xs" style="padding: 0px">
   {#each $allEscrowList as { escrowId, amount, details }, i}
 
       <Card shadow="sm" padding="lg">
-        <h3>Escrow {escrowId}</h3>
-
+        <h3 style="margin-bottom: 0;">{details}</h3>
+        <p style="margin-bottom: 0;">Escrow ID# <strong>{escrowId}</strong></p><br>
         <Badge variant="filled">{Number(amount) / 10 ** 18}</Badge>
-        <p>
-          <strong>{details}</strong>
-        </p>
+        <p>Details of the transaction can go here.</p>
         <Button variant="light" fullSize href={`${window.location.href}?escrowID=${escrowId}`}
           >View</Button
         >
