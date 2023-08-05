@@ -6,6 +6,8 @@
     Center,
     Badge,
     Card,
+    Flex,
+    Divider
   } from "@svelteuidev/core";
   import { NO_ONE, contractAddress } from "../utils/consts";
   import { onMount } from "svelte";
@@ -234,26 +236,34 @@
   <h2>{isMerchant ? "Merchant" : "Buyer"} Portal</h2>
   {#if fetchedEscrow}
     <Card shadow="sm" padding="lg">
-      {#if fetchedEscrow.complete}
-        Status: <Badge variant="filled" color={"green"}>{"complete"}</Badge>
-      {:else if fetchedEscrow.isDead}
-        Status: <Badge variant="filled" color={"red"}>{"cancelled"}</Badge>
-      {:else}
-        Status: <Badge variant="filled" color={"blue"}>{"active"}</Badge>
-      {/if}
-
+<Flex justify="space-between">
+        <p style="margin-top: 0">Escrow #<strong>{escrowID}</strong></p>
+        <div>
+        <p style="margin-top: 0">status
+          {#if fetchedEscrow.complete}
+            <Badge variant="filled" color={"green"}>{"complete"}</Badge>
+          {:else if fetchedEscrow.isDead}
+            <Badge variant="filled" color={"red"}>{"cancelled"}</Badge>
+          {:else}
+            <Badge variant="filled" color={"blue"}>{"active"}</Badge>
+          {/if}
+          <br>
+        </p>
+      </div>
+    </Flex>
+      <h3>{fetchedEscrow.details}</h3>
+      <p>merchant:
+      <Badge size="md" variant="outline" color={"blue"}>{fetchedEscrow.merchant}</Badge>
+    </p>
       <p>
-        merchant: <Badge variant="filled" color={"blue"}
-          >{fetchedEscrow.merchant}</Badge
-        >
-      </p>
-      <p>
-        buyer: <Badge variant="filled" color={hasBuyer ? "purple" : "red"}
+        buyer: <Badge variant="outline" color={hasBuyer ? "purple" : "orange"}
           >{hasBuyer ? fetchedEscrow.buyer : "waiting for buyer"}</Badge
         >
       </p>
       <p>amount: <strong>{escrowEth}</strong></p>
-      <p>details: {fetchedEscrow.details}</p>
+      <Divider variant='dotted' />
+      <small><strong>Description of goods / services</strong></small>
+      <p>Longer description of services can go here.</p>
     </Card>
 
     {#if isMerchant && !fetchedEscrow.isDead}
@@ -295,12 +305,12 @@
       <Timeline active={progress} lineWidth={4} bulletSize={20}>
         <Timeline.Item title="New Escrow">
           <Text color="dimmed" size="sm">
-            You&apos;ve created new branch<Text
+            Merchant created<Text
               variant="link"
               root="span"
               href="#"
-              inherit>fix-notifications</Text
-            > from master</Text
+              inherit>Escrow {escrowID}</Text
+            > for {fetchedEscrow.details}</Text
           >
           <Text size="xs">Merchant Deposited {escrowEth / 4}</Text>
         </Timeline.Item>

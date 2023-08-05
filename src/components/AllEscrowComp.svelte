@@ -62,7 +62,7 @@
 
       <Card shadow="sm" padding="lg">
         <h3 style="margin-bottom: 0;">{details}</h3>
-        <p style="margin-bottom: 0;">Escrow ID# <strong>{escrowId}</strong></p><br>
+        <p style="margin-bottom: 0;">Escrow #<strong>{escrowId}</strong></p><br>
         <Badge variant="filled">{Number(amount) / 10 ** 18}</Badge>
         <p>Details of the transaction can go here.</p>
         <Button variant="light" fullSize href={`${window.location.href}?escrowID=${escrowId}`}
