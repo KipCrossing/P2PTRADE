@@ -57,7 +57,7 @@
 
 <SvelteUIProvider>
 <Group position="center">
-	<Button variant='default' compact on:click={() => (opened = true)} color="dark">
+	<Button radius="lg" size="xs" compact on:click={() => (opened = true)} color="dark">
     <Person slot="leftIcon" />My Wallet</Button>
 </Group>
 <Modal  {opened} on:close={closeModal} withCloseButton={false}>

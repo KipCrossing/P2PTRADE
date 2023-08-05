@@ -9,6 +9,7 @@
     Flex,
     Divider
   } from "@svelteuidev/core";
+
   import { NO_ONE, contractAddress } from "../utils/consts";
   import { onMount } from "svelte";
   import { Timeline, Text } from "@svelteuidev/core";

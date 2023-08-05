@@ -5,7 +5,6 @@
   import { writable, type Writable } from "svelte/store";
   import { useContract } from "../utils/client";
   import type { Escrow } from "../types/escrow";
-  import { Plus } from 'radix-icons-svelte';
 
   let allEscrowList: Writable<(Escrow & { escrowId: number })[]> = writable([]);
 

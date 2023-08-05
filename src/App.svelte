@@ -5,7 +5,8 @@
     SvelteUIProvider,
     Button,
     Modal,
-    Flex
+    Flex,
+    Image
   } from "@svelteuidev/core";
 
   import AccountInfo from "./components/AccountInfo.svelte";
@@ -32,19 +33,16 @@
 
 <SvelteUIProvider>
 
-  <Affix position={{ top: 20, right: 20 }}>
-    <AccountInfo />
-  </Affix>
-
-
   <Modal {opened} on:close={closeModal} withCloseButton={false}>
     <CreateEscrowComp />
   </Modal>
 
   <Container size="xs" override={{ px: "xs" }}>
-    <div style="padding-bottom: 10px">
-    <h1 style="margin-bottom: 0px;">Trading App</h1>
-    <small>A lightweight & decentralised peer to peer trading app.</small>
+    <div style="padding-bottom: 10px; padding-top: 20px">
+      <Flex justify="space-between">
+      <Image width="70%" radius='md' src={'./eztrade.svg'} alt='EZSHARE' />
+      <AccountInfo />
+    </Flex>
   </div>
     {#if escrowID}
     <Flex justify="space-between">
@@ -57,7 +55,6 @@
       <Flex justify="space-between">
         <Button variant="subtle" color="green" on:click={() => (opened = true)}><Plus slot="leftIcon" />New escrow</Button>
       </Flex>
-        <br />
       <AllEscrowComp />
     {/if}
   </Container>
