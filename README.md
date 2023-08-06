@@ -20,15 +20,32 @@ Run:
 npm run dev
 ```
 
-Build:
+Build and start (compiled file):
 
 ```bash
 npm run build
+npm run start
 ```
 
 You will need to install the [Metamask](https://metamask.io/) extension on your browser to interact with the Smart Contract.
 
 Currently the StakedEscrow SC is deployed on the Sepolia testnet. You will need to get some test eth from a _Sepolia faucet_.
+
+### Update ABI
+
+**!!! FIRST: update the contract address !!!**
+
+To update the abi, you will need to add the path of the `StakedEscrow__factory.ts` file to your `.env` file
+
+```
+ABI_PATH=path/to/staked_escrow/typechain-types/factories/StakedEscrow__factory.ts
+```
+
+The to update, run:
+
+```
+npm run update_abi
+```
 
 ### Deploy
 
@@ -54,10 +71,7 @@ To style this site, we are currently using [svelteui.org](https://www.svelteui.o
 
 #### Build
 
-- look deeper into [viem](https://viem.sh/docs/contract/getContract.html)
 - npm cli to get latest, contract address, abi and types from StakesEscrow repo `npm run update_abi`
-- Need to add a step in the build process to copy the js into the html script tag instead of manually doing it.
-- Add Web3 (IPFS) dev dep to automatically upload to IPFS on `npm run deploy`
 
 #### App
 
