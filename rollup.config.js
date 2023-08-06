@@ -7,8 +7,31 @@ import livereload from "rollup-plugin-livereload";
 import css from "rollup-plugin-css-only";
 import sveltePreprocess from "svelte-preprocess";
 import typescript from "@rollup/plugin-typescript";
+import * as fs from "fs";
 
 const production = !process.env.ROLLUP_WATCH;
+
+function bundleScriptToHTML() {
+  try {
+    // Read 'bundle.js' file
+    const scriptData = fs.readFileSync("public/build/bundle.js", "utf-8");
+
+    // Remove newline and tab characters
+    // const cleanedScriptData = scriptData.replace(/\$\`/g, "$$`");
+
+    // Read 'template.html' file
+    const htmlData = fs.readFileSync("compiled/template.html", "utf-8");
+
+    // Replace placeholder with bundle.js contents
+    const splitHtmlData = htmlData.split("** script **");
+    const newHtmlData = splitHtmlData[0] + scriptData + splitHtmlData[1];
+    // Write new 'index.html' file
+    fs.writeFileSync("compiled/index.html", newHtmlData, "utf-8");
+    console.log("The file has been saved as index.html");
+  } catch (err) {
+    console.error(err);
+  }
+}
 
 function serve() {
   let server;
@@ -82,6 +105,13 @@ export default {
     // If we're building for production (npm run build
     // instead of npm run dev), minify
     production && terser(),
+
+    {
+      name: "bundle-html",
+      writeBundle() {
+        bundleScriptToHTML();
+      },
+    },
   ],
   watch: {
     clearScreen: false,
