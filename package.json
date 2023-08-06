@@ -4,11 +4,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "rollup -c",
     "dev": "rollup -c -w",
-    "start": "sirv public --no-clear",
+    "build": "rollup -c",
+    "start": "sirv compiled --no-clear",
     "check": "svelte-check",
-    "deploy": "node scripts/ipfsDeploy.js"
+    "deploy": "node scripts/ipfsDeploy.js",
+    "update_abi": "node scripts/updateABI.js"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^24.0.0",
