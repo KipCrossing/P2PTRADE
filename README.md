@@ -9,8 +9,10 @@ The Smart Contract (SC) that this dApp connects to is the [Staked Escrow](https:
 Install the dependencies:
 
 ```bash
-npm install
+npm install --force
 ```
+
+Need to fix deps problem
 
 Run:
 
