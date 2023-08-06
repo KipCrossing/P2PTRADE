@@ -33,6 +33,6 @@
   "dependencies": {
     "@svelteuidev/core": "^0.14.0",
     "radix-icons-svelte": "^1.2.1",
-    "viem": "^1.4.2"
+    "viem": "1.4.2"
   }
 }
