@@ -28,6 +28,16 @@ You will need to install the [Metamask](https://metamask.io/) extension on your 
 
 Currently the StakedEscrow SC is deployed on the Sepolia testnet. You will need to get some test eth from a _Sepolia faucet_.
 
+### Deploy
+
+To deploy to ipfs:
+
+```
+npm run deploy
+```
+
+This will return the cid
+
 ## Developing
 
 ### EVM
