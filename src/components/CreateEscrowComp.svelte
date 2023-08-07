@@ -1,7 +1,48 @@
 <script lang="ts">
-  import { Container, Button, Alert, Textarea, TextInput } from "@svelteuidev/core";
-  import { parseEther, type Log, type TransactionReceipt } from "viem";
-  import { ethereum, publicClient, useContract } from "../utils/client";
+  import {
+    Container,
+    Button,
+    Alert,
+    Textarea,
+    TextInput,
+  } from "@svelteuidev/core";
+  import {
+    parseEther,
+    type Log,
+    type TransactionReceipt,
+    type EIP1193Provider,
+  } from "viem";
+
+  import {
+    createPublicClient,
+    createWalletClient,
+    custom,
+    getContract,
+  } from "viem";
+  import { sepolia } from "viem/chains";
+  import { abi } from "../types/abi";
+  import { contractAddress } from "../utils/consts";
+
+  export let ethereum: EIP1193Provider;
+  export let account: `0x${string}`;
+
+  const publicClient = createPublicClient({
+    chain: sepolia,
+    transport: custom(ethereum),
+  });
+
+  const walletClient = createWalletClient({
+    account,
+    chain: sepolia,
+    transport: custom(ethereum),
+  });
+
+  const contract = getContract({
+    address: contractAddress,
+    abi: abi,
+    publicClient,
+    walletClient,
+  });
 
   let details: null | string = null;
   let escrowAmount: null | number = null;
@@ -21,11 +62,9 @@
 
     const amount = parseEther(escrowAmount.toString());
 
-    const [account] = await ethereum.request({
+    const account = await ethereum?.request({
       method: "eth_requestAccounts",
     });
-
-    const contract = useContract(account);
 
     type EscrowCreatedDetails = {
       _escrowId: bigint;
@@ -33,7 +72,7 @@
       _value: bigint;
     };
 
-    let merchantLogs: (Log & { args: EscrowCreatedDetails })[] | null = null;
+    let merchantLogs: Log[] = [];
 
     contract.watchEvent.EscrowCreated(
       { _merchant: account },
@@ -59,7 +98,8 @@
     if (merchantLogs) {
       merchantLogs.forEach((log) => {
         if (log.blockNumber === transaction.blockNumber) {
-          newEscrowNumber = Number(log.args._escrowId);
+          const eLog = log as Log & { args: EscrowCreatedDetails };
+          newEscrowNumber = Number(eLog.args._escrowId);
         }
       });
     }
@@ -75,19 +115,14 @@
       target="_blank">View Escrow {newEscrowNumber}</Button
     >
   {:else}
-  <h3>Create Escrow</h3>
-  <TextInput
-  bind:value={details}
-  placeholder="Escrow Details"
-/>
-<TextInput
-type="Amount"
-bind:value={escrowAmount}
-placeholder="Escrow amount"
-/>
-<Textarea
-placeholder="Description of Goods / Services"
-/>
+    <h3>Create Escrow</h3>
+    <TextInput bind:value={details} placeholder="Escrow Details" />
+    <TextInput
+      type="Amount"
+      bind:value={escrowAmount}
+      placeholder="Escrow amount"
+    />
+    <Textarea placeholder="Description of Goods / Services" />
 
     <!-- <input bind:value={details} placeholder="Escrow details" />
     <input

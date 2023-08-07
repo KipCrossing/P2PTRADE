@@ -7,24 +7,49 @@
     Badge,
     Card,
     Flex,
-    Divider
+    Divider,
   } from "@svelteuidev/core";
 
   import { NO_ONE, contractAddress } from "../utils/consts";
   import { onMount } from "svelte";
   import { Timeline, Text } from "@svelteuidev/core";
-  import { getAccount } from "../utils/getAccount";
 
-  import { ethereum, publicClient, useContract } from "../utils/client";
   import type { Escrow } from "../types/escrow";
   import {
     formatEther,
     parseEther,
     type Log,
     type TransactionReceipt,
+    createPublicClient,
+    custom,
+    type EIP1193Provider,
+    createWalletClient,
+    getContract,
   } from "viem";
+  import { mainnet, sepolia } from "viem/chains";
+  import { abi } from "../types/abi";
 
+  export let ethereum: EIP1193Provider;
+  export let account: `0x${string}`;
   export let escrowID: string;
+
+  const publicClient = createPublicClient({
+    chain: sepolia,
+    transport: custom(ethereum),
+  });
+
+  const walletClient = createWalletClient({
+    account,
+    chain: sepolia,
+    transport: custom(ethereum),
+  });
+
+  const contract = getContract({
+    address: contractAddress,
+    abi: abi,
+    publicClient,
+    walletClient,
+  });
 
   onMount(() => {
     if (parseInt(escrowID) === 0 || escrowID) {
@@ -77,12 +102,6 @@
       return;
     }
 
-    const [account] = await ethereum.request({
-      method: "eth_requestAccounts",
-    });
-
-    const contract = useContract(account);
-
     const res = await contract.read.escrows([BigInt(escrowNum)]);
 
     const escrow: Escrow = {
@@ -101,7 +120,7 @@
     }
     fetchedEscrow = escrow;
     escrowEth = Number(formatEther(escrow.amount));
-    const thisAccount: string = await getAccount();
+    const thisAccount: string = await walletClient.account.address;
     if (thisAccount.toLowerCase() === escrow.merchant.toLowerCase()) {
       isMerchant = true;
     }
@@ -155,8 +174,6 @@
       method: "eth_requestAccounts",
     });
 
-    const contract = useContract(account);
-
     const hash = await contract.write.cancelEscrow([BigInt(escrowID)], {});
 
     cancelProgressMsg =
@@ -175,6 +192,12 @@
   let enterProgressMsg: string | null = null;
 
   async function enterEscrow() {
+    if (!escrowEth) {
+      console.log("Please enter escrow amount");
+      enterProgressMsg = "Please enter escrow amount";
+      return;
+    }
+
     const amount = escrowEth / 4;
     const amountInWei = Number(parseEther(amount.toString()));
     enterProgressMsg =
@@ -184,10 +207,8 @@
       method: "eth_requestAccounts",
     });
 
-    const contract = useContract(account);
-
     const hash = await contract.write.deposit([BigInt(escrowID)], {
-      value: amountInWei * 5,
+      value: BigInt(amountInWei * 5),
     });
 
     enterProgressMsg =
@@ -207,6 +228,11 @@
   let completeProgressMsg: string | null = null;
 
   async function completeEscrow() {
+    if (!escrowEth) {
+      completeProgressMsg = "Could not find escrow amount";
+      return;
+    }
+
     const amount = escrowEth / 4;
     completeProgressMsg =
       "Completing Trade, sending " + amount + " ETH to the merchant";
@@ -214,8 +240,6 @@
     const [account] = await ethereum.request({
       method: "eth_requestAccounts",
     });
-
-    const contract = useContract(account);
 
     const hash = await contract.write.completeTrade([BigInt(escrowID)], {});
 
@@ -237,32 +261,36 @@
   <h2>{isMerchant ? "Merchant" : "Buyer"} Portal</h2>
   {#if fetchedEscrow}
     <Card shadow="sm" padding="lg">
-<Flex justify="space-between">
+      <Flex justify="space-between">
         <p style="margin-top: 0">Escrow #<strong>{escrowID}</strong></p>
         <div>
-        <p style="margin-top: 0">status
-          {#if fetchedEscrow.complete}
-            <Badge variant="filled" color={"green"}>{"complete"}</Badge>
-          {:else if fetchedEscrow.isDead}
-            <Badge variant="filled" color={"red"}>{"cancelled"}</Badge>
-          {:else}
-            <Badge variant="filled" color={"blue"}>{"active"}</Badge>
-          {/if}
-          <br>
-        </p>
-      </div>
-    </Flex>
+          <p style="margin-top: 0">
+            status
+            {#if fetchedEscrow.complete}
+              <Badge variant="filled" color={"green"}>{"complete"}</Badge>
+            {:else if fetchedEscrow.isDead}
+              <Badge variant="filled" color={"red"}>{"cancelled"}</Badge>
+            {:else}
+              <Badge variant="filled" color={"blue"}>{"active"}</Badge>
+            {/if}
+            <br />
+          </p>
+        </div>
+      </Flex>
       <h3>{fetchedEscrow.details}</h3>
-      <p>merchant:
-      <Badge size="md" variant="outline" color={"blue"}>{fetchedEscrow.merchant}</Badge>
-    </p>
+      <p>
+        merchant:
+        <Badge size="md" variant="outline" color={"blue"}
+          >{fetchedEscrow.merchant}</Badge
+        >
+      </p>
       <p>
         buyer: <Badge variant="outline" color={hasBuyer ? "purple" : "orange"}
           >{hasBuyer ? fetchedEscrow.buyer : "waiting for buyer"}</Badge
         >
       </p>
       <p>amount: <strong>{escrowEth}</strong></p>
-      <Divider variant='dotted' />
+      <Divider variant="dotted" />
       <small><strong>Description of goods / services</strong></small>
       <p>Longer description of services can go here.</p>
     </Card>
@@ -274,7 +302,9 @@
         <Button loading color="red">Cancel Escrow</Button>
         <Alert title="Status" color="blue">{cancelProgressMsg}</Alert>
       {:else}
-        <Button variant="subtle" color="red" on:click={cancelEscrow}>Cancel Escrow</Button>
+        <Button variant="subtle" color="red" on:click={cancelEscrow}
+          >Cancel Escrow</Button
+        >
       {/if}
     {/if}
 
@@ -306,14 +336,13 @@
       <Timeline active={progress} lineWidth={4} bulletSize={20}>
         <Timeline.Item title="New Escrow">
           <Text color="dimmed" size="sm">
-            Merchant created<Text
-              variant="link"
-              root="span"
-              href="#"
-              inherit>Escrow {escrowID}</Text
+            Merchant created<Text variant="link" root="span" href="#" inherit
+              >Escrow {escrowID}</Text
             > for {fetchedEscrow.details}</Text
           >
-          <Text size="xs">Merchant Deposited {escrowEth / 4}</Text>
+          {#if escrowEth}
+            <Text size="xs">Merchant Deposited {escrowEth / 4}</Text>
+          {/if}
         </Timeline.Item>
 
         <Timeline.Item title={buyItemData.title} color={buyItemData.color}>

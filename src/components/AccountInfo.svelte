@@ -1,8 +1,18 @@
 <script lang="ts">
   import { Badge, Button, Card, SvelteUIProvider } from "@svelteuidev/core";
   import { onMount } from "svelte";
-  import { Modal, Group } from '@svelteuidev/core';
-  import { Person} from 'radix-icons-svelte';
+  import { Modal, Group } from "@svelteuidev/core";
+  import { Person } from "radix-icons-svelte";
+  import {
+    createPublicClient,
+    createWalletClient,
+    custom,
+    type EIP1193Provider,
+  } from "viem";
+  import { sepolia } from "viem/chains";
+
+  export let ethereum: EIP1193Provider;
+  export let account: `0x${string}`;
 
   let opened = false;
 
@@ -10,57 +20,39 @@
     opened = false;
   }
 
-  $: account = null;
-  $: balance = null;
-
-  async function getBal() {
-    console.log("account", account);
-    const balHex = await window.ethereum
-      .request({ method: "eth_getBalance", params: [account, "latest"] })
-      .catch((err) => {
-        if (err.code === 4001) {
-          // EIP-1193 userRejectedRequest error
-          // If this happens, the user rejected the connection request.
-          console.log("Please connect to MetaMask.");
-          return null;
-        } else {
-          console.error(err);
-          return null;
-        }
-      });
-    const balWei = parseInt(balHex, 16);
-    console.log("balWei", balWei);
-    balance = (balWei / 10 ** 18).toString();
-  }
-
-  async function getAccount() {
-    const accounts = await window.ethereum
-      .request({ method: "eth_requestAccounts" })
-      .catch((err) => {
-        if (err.code === 4001) {
-          // EIP-1193 userRejectedRequest error
-          // If this happens, the user rejected the connection request.
-          console.log("Please connect to MetaMask.");
-        } else {
-          console.error(err);
-        }
-      });
-    account = accounts[0];
-  }
+  let balance: number | null = null;
 
   onMount(() => {
-    getAccount().then(() => {
-      getBal();
+    const publicClient = createPublicClient({
+      chain: sepolia,
+      transport: custom(ethereum),
     });
+
+    publicClient.getBalance({ address: account }).then((balWei) => {
+      balance = Number(balWei) / 10 ** 18;
+    });
+
+    // const walletClient = createWalletClient({
+    //   account,
+    //   chain: sepolia,
+    //   transport: custom(ethereum),
+    // });
   });
 </script>
 
 <SvelteUIProvider>
-<Group position="center">
-	<Button radius="lg" size="xs" compact on:click={() => (opened = true)} color="dark">
-    <Person slot="leftIcon" />My Wallet</Button>
-</Group>
-<Modal  {opened} on:close={closeModal} withCloseButton={false}>
+  <Group position="center">
+    <Button
+      radius="lg"
+      size="xs"
+      compact
+      on:click={() => (opened = true)}
+      color="dark"
+    >
+      <Person slot="leftIcon" />My Wallet</Button
+    >
+  </Group>
+  <Modal {opened} on:close={closeModal} withCloseButton={false}>
     <h3>Account Information</h3>
     {#if !account || !balance}
       <Badge variant="filled" color={"red"}>not connected</Badge>
@@ -70,7 +62,7 @@
         Balance: <strong>{balance}</strong>
       </p>
     {/if}
-</Modal>
+  </Modal>
 </SvelteUIProvider>
 
 <!-- <Card shadow="sm" padding="lg">
