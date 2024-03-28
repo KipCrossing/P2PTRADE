@@ -121,7 +121,7 @@
       bind:value={escrowAmount}
       placeholder="Escrow amount"
     />
-    <Textarea placeholder="Description of Goods / Services" />
+    <!-- <Textarea placeholder="Description of Goods / Services" /> -->
 
     <!-- <input bind:value={details} placeholder="Escrow details" />
     <input
