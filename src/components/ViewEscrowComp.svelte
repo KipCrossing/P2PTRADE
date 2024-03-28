@@ -10,7 +10,7 @@
     Divider,
   } from "@svelteuidev/core";
 
-  import { NO_ONE, contractAddress } from "../utils/consts";
+  import { NO_ONE, contractAddress, xrpEVMDevNet } from "../utils/consts";
   import { onMount } from "svelte";
   import { Timeline, Text } from "@svelteuidev/core";
 
@@ -26,21 +26,21 @@
     createWalletClient,
     getContract,
   } from "viem";
-  import { mainnet, sepolia } from "viem/chains";
   import { abi } from "../types/abi";
 
   export let ethereum: EIP1193Provider;
   export let account: `0x${string}`;
   export let escrowID: string;
+  const address = contractAddress;
 
   const publicClient = createPublicClient({
-    chain: sepolia,
+    chain: xrpEVMDevNet,
     transport: custom(ethereum),
   });
 
   const walletClient = createWalletClient({
     account,
-    chain: sepolia,
+    chain: xrpEVMDevNet,
     transport: custom(ethereum),
   });
 
@@ -102,16 +102,12 @@
       return;
     }
 
-    const res = await contract.read.escrows([BigInt(escrowNum)]);
-
-    const escrow: Escrow = {
-      buyer: res[0],
-      merchant: res[1],
-      amount: res[2],
-      details: res[3],
-      isDead: res[4],
-      complete: res[5],
-    };
+    const escrow = await publicClient.readContract({
+      address,
+      abi,
+      functionName: "getEscrow",
+      args: [BigInt(escrowNum)],
+    });
 
     if (escrow.merchant === NO_ONE) {
       console.log("Escrow does not exist");

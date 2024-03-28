@@ -3,8 +3,7 @@
   import type { EIP1193Provider } from "viem";
 
   import { http, createWalletClient, custom, getContract } from "viem";
-  import { mainnet, sepolia } from "viem/chains";
-  import { contractAddress } from "./utils/consts";
+  import { contractAddress, xrpEVMDevNet } from "./utils/consts";
   import { abi } from "./types/abi";
   import { onMount } from "svelte";
   import Main from "./Main.svelte";
@@ -37,12 +36,12 @@
 
   async function requestChainChange() {
     const chainId = await ethereum.request({ method: "eth_chainId" });
-    if (chainId === `0x${sepolia.id.toString(16)}`) {
+    if (chainId === `0x${xrpEVMDevNet.id.toString(16)}`) {
       return chainId;
     }
     const chainIdNew = await ethereum.request({
       method: "wallet_switchEthereumChain",
-      params: [{ chainId: `0x${sepolia.id.toString(16)}` }],
+      params: [{ chainId: `0x${xrpEVMDevNet.id.toString(16)}` }],
     });
     return chainIdNew;
   }

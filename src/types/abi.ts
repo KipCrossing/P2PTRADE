@@ -234,6 +234,57 @@ export const abi = [
   {
     inputs: [
       {
+        internalType: "uint256",
+        name: "_escrowId",
+        type: "uint256",
+      },
+    ],
+    name: "getEscrow",
+    outputs: [
+      {
+        components: [
+          {
+            internalType: "address",
+            name: "buyer",
+            type: "address",
+          },
+          {
+            internalType: "address",
+            name: "merchant",
+            type: "address",
+          },
+          {
+            internalType: "uint256",
+            name: "amount",
+            type: "uint256",
+          },
+          {
+            internalType: "string",
+            name: "details",
+            type: "string",
+          },
+          {
+            internalType: "bool",
+            name: "isDead",
+            type: "bool",
+          },
+          {
+            internalType: "bool",
+            name: "complete",
+            type: "bool",
+          },
+        ],
+        internalType: "struct StakedEscrow.Escrow",
+        name: "",
+        type: "tuple",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
         internalType: "address",
         name: "_merchant",
         type: "address",

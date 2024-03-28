@@ -19,21 +19,20 @@
     custom,
     getContract,
   } from "viem";
-  import { sepolia } from "viem/chains";
   import { abi } from "../types/abi";
-  import { contractAddress } from "../utils/consts";
+  import { contractAddress, xrpEVMDevNet } from "../utils/consts";
 
   export let ethereum: EIP1193Provider;
   export let account: `0x${string}`;
 
   const publicClient = createPublicClient({
-    chain: sepolia,
+    chain: xrpEVMDevNet,
     transport: custom(ethereum),
   });
 
   const walletClient = createWalletClient({
     account,
-    chain: sepolia,
+    chain: xrpEVMDevNet,
     transport: custom(ethereum),
   });
 

@@ -10,6 +10,7 @@
     type EIP1193Provider,
   } from "viem";
   import { sepolia } from "viem/chains";
+  import { xrpEVMDevNet } from "../utils/consts";
 
   export let ethereum: EIP1193Provider;
   export let account: `0x${string}`;
@@ -24,7 +25,7 @@
 
   onMount(() => {
     const publicClient = createPublicClient({
-      chain: sepolia,
+      chain: xrpEVMDevNet,
       transport: custom(ethereum),
     });
 
