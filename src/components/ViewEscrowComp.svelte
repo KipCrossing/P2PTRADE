@@ -286,9 +286,9 @@
         >
       </p>
       <p>amount: <strong>{escrowEth}</strong></p>
-      <Divider variant="dotted" />
+      <!-- <Divider variant="dotted" />
       <small><strong>Description of goods / services</strong></small>
-      <p>Longer description of services can go here.</p>
+      <p>Longer description of services can go here.</p> -->
     </Card>
 
     {#if isMerchant && !fetchedEscrow.isDead}
