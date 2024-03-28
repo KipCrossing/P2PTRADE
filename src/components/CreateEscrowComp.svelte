@@ -98,6 +98,7 @@
       merchantLogs.forEach((log) => {
         if (log.blockNumber === transaction.blockNumber) {
           const eLog = log as Log & { args: EscrowCreatedDetails };
+          console.log("eLog", eLog);
           newEscrowNumber = Number(eLog.args._escrowId);
         }
       });
